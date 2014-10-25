@@ -22,7 +22,7 @@ def add_participant(display_name, login):
         raise Exception
 
     doc = {'display_name': display_name,'login': login,'joined_time': timestamp_now()}
-    
+
     prts_coll.insert(doc)
 
 def add_match(results):
@@ -64,10 +64,8 @@ def __clear_matches():
     matches_coll.remove({})
 if __name__ == '__main__':
     try:
-        add_participant('Fred', 'fdawg') 
-    except:
-        pass
-    try:
+        add_participant('James', 'jbomb')
+        add_participant('Fred', 'fdawg')
         add_participant('James', 'jtrain')
     except:
         pass
