@@ -1,12 +1,16 @@
 from pymongo import MongoClient
 import time
 import calendar
+import os
 
 db_name = 'elotron-dev'
 participants_collection_name = 'participants'
 matches_collection_name = 'matches'
 
-mongo_uri = 'mongodb://localhost:27017'
+try:
+    mongo_uri = os.environ['MONGOHQ_URL']
+except KeyError:
+    mongo_uri = 'mongodb://localhost:27017'
 
 client = MongoClient(mongo_uri)
 
