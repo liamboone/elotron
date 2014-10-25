@@ -60,21 +60,48 @@ def get_matches():
 
     return matches
 
-def __clear_matches():
-    matches_coll.remove({})
-if __name__ == '__main__':
-    try:
-        add_participant('James', 'jbomb')
-        add_participant('Fred', 'fdawg')
-        add_participant('James', 'jtrain')
-    except:
-        pass
-    __clear_matches()
+def get_display_name(login):
+    doc = prts_coll.find_one({'login':login})
+    if doc == None:
+        raise Exception
+    
+    return doc['display_name']
 
-    match_result = [('fdawg', 17), ('jtrain', 12)]
-    add_match(match_result)
-    add_match([('fdawg', 6), ('jbomb',21)])
-    for x in matches_coll.find():
-        print(x)
+def get_all_users():
+    logins = []
+    for doc in prts_coll.find():
+        logins.append(doc['login'])
+
+    return logins
+
+def _clear_matches():
+    matches_coll.remove({})
+
+def _clear_participants():
+    prts_coll.remove({})
+
+def setup_test_db():
+    _clear_participants()
+    _clear_matches()
+
+    add_participant('Kaylee', 'ktrain')
+    add_participant('Finn', 'fbomb')
+    add_participant('Lucy', 'lilmike')
+
+    add_match([('ktrain', 16), ('fbomb', 12)])
+    add_match([('fbomb', 21), ('lilmike', 11)])
+    add_match([('lilmike', 21), ('ktrain', 2)])
+    add_match([('lilmike', 21), ('fbomb', 7)])
+
+if __name__ == '__main__':
+    setup_test_db()
     print 'Getting matches'
     print get_matches()
+
+    print 'Getting users'
+    print get_all_users()
+
+    print 'Getting display names'
+    for login in get_all_users():
+        print get_display_name(login)
+
