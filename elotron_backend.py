@@ -93,8 +93,11 @@ def setup_test_db():
     add_participant('Lucy', 'lilmike')
 
     add_match([('ktrain', 16), ('fbomb', 12)])
+    time.sleep(1)
     add_match([('fbomb', 21), ('lilmike', 11)])
+    time.sleep(1)
     add_match([('lilmike', 21), ('ktrain', 2)])
+    time.sleep(1)
     add_match([('lilmike', 21), ('fbomb', 7)])
 
 if __name__ == '__main__':
