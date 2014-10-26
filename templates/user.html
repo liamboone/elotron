@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %} {{ users[uname] }} {% endblock %}
+{% block content %}
+    <h1> Elotron </h1>
+
+    <ul id="matches">
+    {% for match in matches %}
+        <li>
+            {{ match.participants[0][0] }} ( {{ match.participants[0][1] }} ) Vs. 
+            {{ match.participants[1][0] }} ( {{ match.participants[1][1] }} ) @ 
+            {{ match.time }} 
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
+
