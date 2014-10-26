@@ -34,7 +34,7 @@ def get_elo_ranks(match_results):
        else:
            Sa = 0.5
            Sb = 0.5
-       
+
        ranks[name_a] = ranks[name_a] + K*(Sa-Ea)
        ranks[name_b] = ranks[name_b] + K*(Sb-Eb)
 

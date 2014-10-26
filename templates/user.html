@@ -2,13 +2,31 @@
 {% block title %} {{ users[uname] }} {% endblock %}
 {% block content %}
     <h1> Elotron </h1>
+    <dl id="users">
+        {% for user, dispName in users.iteritems() %}
+        <dt>
+            {% if user == uname %}<b>{% endif %}
+            {{ dispName }}
+            {% if user == uname %}</b>{% endif %}
+        </dt>
+        <dd>
+            {{ ranks[user] }}
+        </dd>
+        {% endfor %}
+    </dl>
 
     <ul id="matches">
     {% for match in matches %}
         <li>
-            {{ match.participants[0][0] }} ( {{ match.participants[0][1] }} ) Vs. 
-            {{ match.participants[1][0] }} ( {{ match.participants[1][1] }} ) @ 
-            {{ match.time }} 
+        {% if match.participants[0][0] == uname %}<b>{% endif %}
+            {{ users[match.participants[0][0]] }} 
+        {% if match.participants[0][0] == uname %}</b>{% endif %}
+                ( {{ match.participants[0][1] }} ) Vs. 
+        {% if match.participants[1][0] == uname %}<b>{% endif %}
+            {{ users[match.participants[1][0]] }} 
+        {% if match.participants[1][0] == uname %}</b>{% endif %}
+                ( {{ match.participants[1][1] }} ) @ 
+            {{ match.date }} 
         </li>
     {% endfor %}
     </ul>
