@@ -2,6 +2,17 @@
     {% block head %}
     <title> {% block title %}{% endblock %} - Elotron </title>
     {% endblock %}
+    <style>
+    #matches li { list-style-type: none }
+    #match { clear:both; display:inline-block; overflow:auto; margin:5px; border-radius:10px; background-color:#dddddd; }
+    #participants { }
+    #participant{ float:left; width:100px; margin:5px; border-radius:10px; }
+    #name { float:left; margin:5px; }
+    #score { float:right; margin:5px; }
+    #date { clear:both; text-align:right; margin-bottom:5px; margin-right:5px; font-size:small }
+    .loser {background-color:#ffaaaa;}
+    .winner {background-color:#aaffaa;}
+    </style>
 </head>
 
 <body>

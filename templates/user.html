@@ -10,24 +10,30 @@
             {% if user == uname %}</b>{% endif %}
         </dt>
         <dd>
-            {{ ranks[user] }}
+            {{ ranks[user]|round|int }}
         </dd>
         {% endfor %}
     </dl>
 
     <ul id="matches">
     {% for match in matches %}
-        <li>
-        {% if match.participants[0][0] == uname %}<b>{% endif %}
-            {{ users[match.participants[0][0]] }} 
-        {% if match.participants[0][0] == uname %}</b>{% endif %}
-                ( {{ match.participants[0][1] }} ) Vs. 
-        {% if match.participants[1][0] == uname %}<b>{% endif %}
-            {{ users[match.participants[1][0]] }} 
-        {% if match.participants[1][0] == uname %}</b>{% endif %}
-                ( {{ match.participants[1][1] }} ) @ 
-            {{ match.date }} 
-        </li>
+        <li><div id="match">
+            <div id="participants">
+            {% for i, player in enumerate(match.participants) %}
+            <div id="participant" class={%if i == match.winner%}"winner"{%else%}"loser"{%endif%}>
+                <div id="name">
+                    {{ users[player[0]] }}
+                </div>
+                <div id="score">
+                    {{ player[1] }}
+                </div>
+                </div>
+            {% endfor %}
+            </div>
+            <div id="date">
+                {{ match.date }} 
+            </div>
+        </div></li>
     {% endfor %}
     </ul>
 {% endblock %}
