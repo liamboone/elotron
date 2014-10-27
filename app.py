@@ -34,6 +34,7 @@ def user(uname=''):
     matches = [pretty_match(sort_match(match, uname)) for match in get_matches()
                if (match['participants'][0][0] == uname or
                    match['participants'][1][0] == uname or uname == '')]
+    matches = reversed(matches)
     return flask.render_template('user.html', matches=matches,
                                  uname=uname, users=users,
                                  ranks=get_elo_ranks(get_matches()),
