@@ -5,7 +5,7 @@ import os
 
 try:
     db_name = os.environ['DB_NAME']
-except KeyError
+except KeyError:
     db_name = 'elotron-dev'
 
 participants_collection_name = 'participants'
