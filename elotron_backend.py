@@ -3,7 +3,11 @@ import time
 import calendar
 import os
 
-db_name = 'elotron-dev'
+try:
+    db_name = os.environ['DB_NAME']
+except KeyError
+    db_name = 'elotron-dev'
+
 participants_collection_name = 'participants'
 matches_collection_name = 'matches'
 
