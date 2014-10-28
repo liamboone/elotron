@@ -40,6 +40,11 @@ def user(uname=''):
                                  ranks=get_elo_ranks(get_matches()),
                                  enumerate=enumerate)
 
+@app.route('/favicon.ico')
+def favicon():
+    return flask.send_from_directory(os.path.join(app.root_path, 'static'),
+                               'ico/favicon.ico')
+
 if __name__ == '__main__':
     app.debug = True
     app.run()

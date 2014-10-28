@@ -1,7 +1,6 @@
 <head>
     {% block head %}
     <title> {% block title %}{% endblock %} - Elotron </title>
-    {% endblock %}
     <style>
     #matches li { list-style-type: none }
     #match { clear:both; display:inline-block; overflow:auto; margin:5px; border-radius:10px; background-color:#dddddd; }
@@ -13,6 +12,9 @@
     .loser {background-color:#ffaaaa;}
     .winner {background-color:#aaffaa;}
     </style>
+    <link rel="shortcut icon" 
+          href="{{ url_for('static', filename='ico/favicon.ico') }}">
+    {% endblock %}
 </head>
 
 <body>
