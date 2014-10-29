@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block title %} {{ users[uname] }} {% endblock %}
+{% block user_menu %}
+{% for user in users|dictsort(false, 'value') %}
+<li><a href='/{{user[0]}}'>{{user[1]}}</a></li>
+{% endfor %}
+{% endblock %}
 {% block user_content %}
 {{super()}}
 {% for rank, user in ranks %}
@@ -20,11 +25,12 @@
                 <ul id="participant" class="list-inline">
                     {% for i, player in enumerate(match.participants) %}
                     <li>
+                    <a href="/{{player[0]}}">
                     {% if i == match.winner %}<b>{% endif %}
                         {{ users[player[0]] }}
                         {% if i == match.winner %}</b>{% endif %}
                     <span class="badge {% if i == match.winner %}alert-info{% endif %}">{{ player[1] }}</span>
-                    </li>
+                </a></li>
                     {% endfor %}
                 </ul>
             </div>
