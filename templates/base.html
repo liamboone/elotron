@@ -113,13 +113,30 @@
     </div>
     <div id="main">
         <div class="col-md-12">
-            <h3>Matches</h3>
             <p class="pull-right visible-xs">
-            <button type="button" class="btn btn-primary btn-xs"
-                data-toggle="offcanvas">Toggle nav</button>
+                <button type="button" class="btn btn-primary btn-xs"
+                    data-toggle="offcanvas">Rankings</button>
             </p>
-            {% block match_content %}
-            {% endblock %}
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active">
+                    <a href="#matches" role="tab" data-toggle="tab">Matches</a>
+                </li>
+                <li>
+                    <a href="#new" role="tab" data-toggle="tab">Add Match</a>
+                </li>
+                <li>
+                    <a href="#stats" role="tab" data-toggle="tab">Stats</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="matches">
+                    <br />
+                    {% block match_content %}
+                    {% endblock %}
+                </div>
+                <div class="tab-pane fade" id="new"><p>There Mike</p></div>
+                <div class="tab-pane fade" id="stats"><p>Here are your damn tabs</p></div>
+            </div>
         </div>
     </div>
 </div>
