@@ -34,16 +34,22 @@ def user(uname=''):
     matches = [pretty_match(sort_match(match, uname)) for match in get_matches()
                if (match['participants'][0][0] == uname or
                    match['participants'][1][0] == uname or uname == '')]
-    matches = reversed(matches)
+    matches.reverse()
+    ranks = [(r,u) for u,r in get_elo_ranks(get_matches()).items()]
+    ranks.sort(reverse=True)
     return flask.render_template('user.html', matches=matches,
                                  uname=uname, users=users,
-                                 ranks=get_elo_ranks(get_matches()),
+                                 ranks=ranks,
                                  enumerate=enumerate)
 
 @app.route('/favicon.ico')
 def favicon():
     return flask.send_from_directory(os.path.join(app.root_path, 'static'),
                                'ico/favicon.ico')
+
+@app.route('/test')
+def test():
+    return flask.render_template('bootbase.html')
 
 if __name__ == '__main__':
     app.debug = True

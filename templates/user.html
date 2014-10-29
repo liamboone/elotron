@@ -1,40 +1,38 @@
 {% extends "base.html" %}
 {% block title %} {{ users[uname] }} {% endblock %}
-{% block content %}
-    <h1> Elotron </h1>
-    <dl id="users">
-        {% for user, dispName in users.iteritems() %}
-        <dt>
-            {% if user == uname %}<b>{% endif %}
-            {{ dispName }}
-            {% if user == uname %}</b>{% endif %}
-        </dt>
-        <dd>
-            {{ ranks[user]|round|int }}
-        </dd>
-        {% endfor %}
-    </dl>
+{% block user_content %}
+{{super()}}
+{% for rank, user in ranks %}
+<a href="/{{user}}"
+    class="list-group-item {% if user == uname %}active{% endif %}">
+    <span class="badge">{{ rank|round|int }}</span>
+    {{ users[user] }}
+</a>
+{% endfor %}
+{% endblock %}
 
-    <ul id="matches">
+{% block match_content %}
+{{super()}}
     {% for match in matches %}
-        <li><div id="match">
-            <div id="participants">
-            {% for i, player in enumerate(match.participants) %}
-            <div id="participant" class={%if i == match.winner%}"winner"{%else%}"loser"{%endif%}>
-                <div id="name">
-                    {{ users[player[0]] }}
-                </div>
-                <div id="score">
-                    {{ player[1] }}
-                </div>
-                </div>
-            {% endfor %}
+    <div id="match" class="panel panel-default">
+        <div id="participants" class="panel-body">
+            <div style="float:left">
+                <ul id="participant" class="list-inline">
+                    {% for i, player in enumerate(match.participants) %}
+                    <li>
+                    {% if i == match.winner %}<b>{% endif %}
+                        {{ users[player[0]] }}
+                        {% if i == match.winner %}</b>{% endif %}
+                    <span class="badge {% if i == match.winner %}alert-info{% endif %}">{{ player[1] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div id="date">
+            <div id="date" style="float:right">
                 {{ match.date }} 
             </div>
-        </div></li>
+        </div>
+    </div>
     {% endfor %}
-    </ul>
 {% endblock %}
 
