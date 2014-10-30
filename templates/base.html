@@ -1,6 +1,6 @@
 <head>
     {% block head %}
-    <title> {% block title %}{% endblock %} - Elotron </title>
+    <title> {% block title %}{% endblock %}Elotron</title>
     <link rel="shortcut icon" 
           href="/static/ico/favicon.ico" 
           />
@@ -16,6 +16,7 @@
           />
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
     <meta name="viewport" 
           content="width=device-width, initial-scale=1.0" />
    
@@ -134,8 +135,16 @@
                     {% block match_content %}
                     {% endblock %}
                 </div>
-                <div class="tab-pane fade" id="new"><p>There Mike</p></div>
-                <div class="tab-pane fade" id="stats"><p>Here are your damn tabs</p></div>
+                <div class="tab-pane fade" id="new">
+                    <br />
+                    {% block add_match %}
+                    {% endblock %}
+                </div>
+                <div class="tab-pane fade" id="stats">
+                    <br />
+                    {% block stats_content %}
+                    {% endblock %}
+                </div>
             </div>
         </div>
     </div>

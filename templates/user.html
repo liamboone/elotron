@@ -1,10 +1,13 @@
 {% extends "base.html" %}
-{% block title %} {{ users[uname] }} {% endblock %}
+
+{% block title %}{{ users[uname] }} {% if uname != '' %} - {% endif %}{% endblock %}
+
 {% block user_menu %}
 {% for user in users|dictsort(false, 'value') %}
 <li><a href='/{{user[0]}}'>{{user[1]}}</a></li>
 {% endfor %}
 {% endblock %}
+
 {% block user_content %}
 {{super()}}
 {% for rank, user in ranks %}
@@ -42,3 +45,42 @@
     {% endfor %}
 {% endblock %}
 
+{% block add_match %}
+<script>
+var postMatch = function ()
+{
+    var match_str = document.getElementById("player1").value + ";" +
+                    document.getElementById("score1").value + ";" +
+                    document.getElementById("player2").value + ";" +
+                    document.getElementById("score2").value;
+    console.log(match_str)
+    var match_b64 = btoa(match_str).replace('/','_').replace('+','.');
+    d3.json("/add_match/"+match_b64, function(error, data) {
+                if (error) return console.warn(error);
+                loopback = data;
+                console.log(loopback);
+                console.log(loopback[0].data);
+            });
+}
+</script>
+<form id="add_match" class="form-inline" role="form">
+    <div class="form-group">
+        {% for player in [1,2] %}
+        <select id="player{{player}}" class="form-control">
+            {% for user in users|dictsort(false, 'value') %}
+            <option 
+            {% if player == 1 and uname == user[0] %}selected="selected"{% endif %}
+            value="{{user[0]}}">
+            {{user[1]}}
+            </option>
+            {% endfor %}
+        </select>
+        <input id="score{{player}}" class="form-control" placeholder="score">
+        <br />
+        <br />
+        {% endfor %}
+        <input onclick="postMatch();" type="button" 
+            class="btn btn-primary" value="Add Match">
+    </div>
+</form>
+{% endblock %}

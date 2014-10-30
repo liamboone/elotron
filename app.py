@@ -1,8 +1,11 @@
+import json
 import flask
 from datetime import datetime
 from elotron_backend import *
 from rankings import *
 import numpy as np
+import base64 as b64
+import sys
 
 app = flask.Flask(__name__)
 
@@ -23,7 +26,7 @@ def sort_match(match, uname):
 
 def pretty_match(match):
     date = datetime.fromtimestamp(match['time'])
-    match['date'] = date.strftime('%b-%m-%Y %H:%M:%S')
+    match['date'] = date.strftime('%b-%d-%Y %H:%M:%S')
     match['winner'] = np.argmax([score for player,score in match['participants']])
     return match
 
@@ -47,10 +50,26 @@ def favicon():
     return flask.send_from_directory(os.path.join(app.root_path, 'static'),
                                'ico/favicon.ico')
 
-@app.route('/test')
-def test():
-    return flask.render_template('bootbase.html')
+@app.route('/<uname>/stats')
+def stats(uname=''):
+    return "test"
+
+@app.route('/add_match/<match_b64>')
+def new_match(match_b64):
+    #add_match([('ktrain', 21), ('fbomb', 12)])
+    player1, score1, player2, score2 = b64.b64decode(match_b64).split(';')
+    dump = {}
+    try:
+        if(player1 == player2):
+            raise Exception("player1 == player2")
+        res = [(player1, int(score1)), (player2, int(score2))]
+        dump['res'] = res
+        add_match(res)
+        dump['data'] = 'ok'
+        return json.dumps([dump])
+    except Exception as e:
+        dump['data'] = str(e)
+        return json.dumps([dump])
 
 if __name__ == '__main__':
-    app.debug = True
     app.run()
