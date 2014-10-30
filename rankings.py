@@ -30,7 +30,7 @@ def get_elo_ranks(match_results):
            Sb = 0.0
        elif score_a < score_b:
            Sa = 0.0
-           Sa = 1.0
+           Sb = 1.0
        else:
            Sa = 0.5
            Sb = 0.5
