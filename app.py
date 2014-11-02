@@ -56,20 +56,39 @@ def stats(uname=''):
 
 @app.route('/add_match/<match_b64>')
 def new_match(match_b64):
-    #add_match([('ktrain', 21), ('fbomb', 12)])
     player1, score1, player2, score2 = b64.b64decode(match_b64).split(';')
-    dump = {}
+    dump = {'error': []}
+    bad_match = False
+
+    try: #test score1
+        score1 = int(score1)
+    except ValueError:
+        dump['error'].append((['score1'],
+                              '"{}" is not an integer.'.format(score1)))
+        bad_match = True
+
+    try: #test score2
+        score2 = int(score2)
+    except ValueError:
+        dump['error'].append((['score2'],
+                              '"{}" is not an integer.'.format(score2)))
+        bad_match = True
+
+    if player1 == player2:
+        dump['error'].append((['player1', 'player2'],
+                              "Matches must have distinct opponents."))
+        bad_match = True
+
+    if bad_match:
+        return json.dumps(dump)
+
+    match = [(player1, score1), (player2, score2)]
     try:
-        if(player1 == player2):
-            raise Exception("player1 == player2")
-        res = [(player1, int(score1)), (player2, int(score2))]
-        dump['res'] = res
-        add_match(res)
-        dump['data'] = 'ok'
-        return json.dumps([dump])
+        add_match(match)
+        return json.dumps(dump)
     except Exception as e:
-        dump['data'] = str(e)
-        return json.dumps([dump])
+        dump['error'].append(([], "Unknown error."))
+        return json.dumps(dump)
 
 if __name__ == '__main__':
     app.run()

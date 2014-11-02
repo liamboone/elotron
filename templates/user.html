@@ -53,34 +53,77 @@ var postMatch = function ()
                     document.getElementById("score1").value + ";" +
                     document.getElementById("player2").value + ";" +
                     document.getElementById("score2").value;
-    console.log(match_str)
     var match_b64 = btoa(match_str).replace('/','_').replace('+','.');
     d3.json("/add_match/"+match_b64, function(error, data) {
                 if (error) return console.warn(error);
                 loopback = data;
-                console.log(loopback);
-                console.log(loopback[0].data);
+                console.log(data);
+                if (data.error.length == 0)
+                {
+                    window.location.reload();
+                }
+                else
+                {
+                    document.querySelector("#player1-form-group")
+                        .classList.remove("has-error");
+                    document.querySelector("#player2-form-group")
+                        .classList.remove("has-error");
+                    document.querySelector("#score1-form-group")
+                        .classList.remove("has-error");
+                    document.querySelector("#score2-form-group")
+                        .classList.remove("has-error");
+
+                    var previous_msgs = document
+                        .getElementsByClassName("alert");
+                    while(previous_msgs[0])
+                    {
+                        previous_msgs[0].parentElement.removeChild(previous_msgs[0])
+                    }
+
+                    var inputs = document.getElementById("match_inputs");
+
+                    for (var i = 0; i < data.error.length; ++i)
+                    {
+                        err = data.error[i];
+                        for (var j = 0; j < err[0].length; ++j)
+                        {
+                            document
+                                .querySelector("#"+err[0][j]+"-form-group")
+                                .classList.add("has-error");
+                        }
+                        var err_msg = document.createElement("div");
+                        err_msg.classList.add("alert");
+                        err_msg.classList.add("alert-danger");
+                        err_msg.classList.add("alert-dismissable");
+                        err_msg.innerHTML = "<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><span aria-hidden=\"true\">&times;</span><span class=\"sr-only\">Close</span></button><strong>Error:</strong> "+err[1];
+                        inputs.appendChild(err_msg);
+                    }
+                }
             });
 }
 </script>
 <form id="add_match" class="form-inline" role="form">
-    <div class="form-group">
+    <div id="match_inputs">
         {% for player in [1,2] %}
-        <select id="player{{player}}" class="form-control">
-            {% for user in users|dictsort(false, 'value') %}
-            <option 
-            {% if player == 1 and uname == user[0] %}selected="selected"{% endif %}
-            value="{{user[0]}}">
-            {{user[1]}}
-            </option>
-            {% endfor %}
-        </select>
-        <input id="score{{player}}" class="form-control" placeholder="score">
+        <div id="player{{player}}-form-group" class="form-group">
+            <select id="player{{player}}" class="form-control form-control-danger">
+                {% for user in users|dictsort(false, 'value') %}
+                <option 
+                {% if player == 1 and uname == user[0] %}selected="selected"{% endif %}
+                value="{{user[0]}}">
+                {{user[1]}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="score{{player}}-form-group" class="form-group has-feedback">
+            <input id="score{{player}}" class="form-control" placeholder="score">
+        </div>
         <br />
         <br />
         {% endfor %}
-        <input onclick="postMatch();" type="button" 
-            class="btn btn-primary" value="Add Match">
     </div>
+    <input onclick="postMatch();" type="button" 
+        class="btn btn-primary" value="Add Match">
 </form>
 {% endblock %}
