@@ -52,7 +52,14 @@ def favicon():
 
 @app.route('/<uname>/stats')
 def stats(uname=''):
-    return "test"
+    matches = get_matches()
+    rank_history = [ranks for ranks in get_elo_ranks(matches, history=True)]
+    urank = [{'elo':rank_history[0][uname], 'time':matches[0]['time']-1}]
+
+    for i, ranks in enumerate(rank_history[1:]):
+        urank.append({'elo':ranks[uname], 'time':matches[i]['time']})
+
+    return json.dumps(urank)
 
 @app.route('/add_match/<match_b64>')
 def new_match(match_b64):
