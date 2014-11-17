@@ -219,14 +219,12 @@ var make_chart = function(error, data)
 var make_better_chart = function(error, data)
 {
     console.log(data);
-    y.domain([d3.min(data, function(d) {return d3.round(d.elo)}) - 10, 
-              d3.max(data, function(d) {return d3.round(d.elo)}) + 10]);
-    x.domain([d3.min(data, function(d) {return d3.round(d.time)}), 
-              d3.max(data, function(d) {return d3.round(d.time)})]);
     var y_min = d3.min(data, function(d) {return d3.round(d.elo)}) - 10; 
     var y_max = d3.max(data, function(d) {return d3.round(d.elo)}) + 10;
     var x_min = d3.min(data, function(d) {return d3.round(d.time)}); 
     var x_max = d3.max(data, function(d) {return d3.round(d.time)});
+    y.domain([y_min, y_max ]);
+    x.domain([x_min, x_max]);
     var vis = chart;
     
         //d3.select("body")
