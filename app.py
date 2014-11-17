@@ -38,11 +38,13 @@ def user(uname=''):
                if (match['participants'][0][0] == uname or
                    match['participants'][1][0] == uname or uname == '')]
     matches.reverse()
-    ranks = [(r,u) for u,r in get_elo_ranks(get_matches()).items()]
-    ranks.sort(reverse=True)
+    ranks = {u:r for u,r in get_elo_ranks(get_matches()).items()}
+    top_five = [(r,u) for u,r in ranks.items()]
+    top_five.sort(reverse=True)
+    top_five = top_five[:5]
     return flask.render_template('user.html', matches=matches,
                                  uname=uname, users=users,
-                                 ranks=ranks,
+                                 ranks=ranks, top_five=top_five,
                                  enumerate=enumerate)
 
 @app.route('/favicon.ico')
