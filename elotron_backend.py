@@ -2,6 +2,8 @@ from pymongo import MongoClient
 import time
 import calendar
 import os
+from itertools import permutations
+from random import randint
 
 try:
     db_name = os.environ['DB_NAME']
@@ -95,14 +97,16 @@ def setup_test_db():
     add_participant('Kaylee', 'ktrain')
     add_participant('Finn', 'fbomb')
     add_participant('Lucy', 'lilmike')
+    add_participant('Red', 'radar')
+    add_participant('Callista', 'idiot')
+    add_participant('Pyrite', 'young_peezy')
 
-    add_match([('ktrain', 16), ('fbomb', 12)])
-    time.sleep(1)
-    add_match([('fbomb', 21), ('lilmike', 11)])
-    time.sleep(1)
-    add_match([('lilmike', 21), ('ktrain', 2)])
-    time.sleep(1)
-    add_match([('lilmike', 21), ('fbomb', 7)])
+    for one, two in permutations(get_all_users(), 2):
+        if randint(0,1) == 1:
+            one, two = two, one
+        add_match([(one, 21), (two, randint(0,19))])
+        print one, 'vs', two
+        time.sleep(1)
 
 if __name__ == '__main__':
     setup_test_db()

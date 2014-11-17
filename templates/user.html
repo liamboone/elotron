@@ -10,13 +10,26 @@
 
 {% block user_content %}
 {{super()}}
-{% for rank, user in ranks %}
-<a href="/{{user}}"
-    class="list-group-item {% if user == uname %}active{% endif %}">
-    <span class="badge">{{ rank|round|int }}</span>
-    {{ users[user] }}
-</a>
-{% endfor %}
+<h3>Rankings</h3>
+<div class="list-group">
+    {% for rank, user in top_five %}
+    <a href="/{{user}}"
+        class="list-group-item {% if user == uname %}active{% endif %}">
+        <span class="badge">{{ rank|round|int }}</span>
+        {{ users[user] }}
+    </a>
+    {% endfor %}
+</div>
+{% if uname != "" and ranks[uname] < top_five[4][0] %}
+<div style="text-align:center;"><h4>⋮</h4></div><br />
+<div class="list-group">
+    <a href="/{{uname}}"
+        class="list-group-item active">
+        <span class="badge">{{ ranks[uname]|round|int }}</span>
+        {{ users[uname] }}
+    </a>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block match_content %}
