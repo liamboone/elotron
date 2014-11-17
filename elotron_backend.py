@@ -4,6 +4,7 @@ import calendar
 import os
 from itertools import permutations
 from random import randint
+import datetime
 
 try:
     db_name = os.environ['DB_NAME']
@@ -27,6 +28,16 @@ matches_coll = db[matches_collection_name]
 def timestamp_now():
     return calendar.timegm(time.gmtime())
 
+def timestamp_month_day(mnth, dy):
+    now = datetime.datetime.utcnow()
+    then = now.replace(month=mnth, day=dy)
+    
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    delta = then-epoch
+
+    utc_delta = datetime.datetime.now() - now + delta
+    return int(round(delta.total_seconds()))
+
 def add_participant(display_name, login):
     if prts_coll.find({"login":login}).count() > 0:
         raise Exception
@@ -35,7 +46,7 @@ def add_participant(display_name, login):
 
     prts_coll.insert(doc)
 
-def add_match(results):
+def _add_match(results, timestamp):
     names = []
     scores = []
     for (name, score) in results:
@@ -46,8 +57,14 @@ def add_match(results):
 
     doc = {"participants": names,
         "scores": scores,
-        "time": timestamp_now()}
+        "time": timestamp}
     matches_coll.insert(doc)
+
+def add_match(results):
+    _add_match(results, timestamp_now())
+
+def add_match_on_day(results, month, day):
+    _add_match(results, timestamp_month_day(month, day))
 
 def get_participant_name(login):
     doc = prts_coll.find_one({"login":login})
@@ -119,4 +136,3 @@ if __name__ == '__main__':
     print 'Getting display names'
     for login in get_all_users():
         print get_display_name(login)
-
