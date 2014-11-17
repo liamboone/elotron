@@ -147,6 +147,9 @@ var postMatch = function ()
 var width = 360,
 height = 200;
 
+var w = width;
+var h = height;
+
 var y = d3.scale.linear()
     .range([height, 0]);
 var x = d3.scale.linear()
@@ -199,8 +202,8 @@ var make_better_chart = function(error, data)
         .attr("transform", "translate(0, 200)");
    
     var line = d3.svg.line()
-        .x(function(d,i) { return x(i); })
-        .y(function(d) { return -1 * y(d); });
+        .x(function(d,i) { return x(d.time); })
+        .y(function(d) { return -1 * y(d.elo); });
 
     g.append("svg:path").attr("d", line(data));
 
@@ -214,14 +217,14 @@ var make_better_chart = function(error, data)
          .attr("x1", x(0))
          .attr("y1", -1 * y(0))
          .attr("x2", x(0))
-         .attr("y2", -1 * y(d3.max(data)))
+         .attr("y2", -1 * y(d3.max(data, function(d) {return d3.round(d.elo)})))
 
     g.selectAll(".xLabel")
         .data(x.ticks(5))
         .enter().append("svg:text")
         .attr("class", "xLabel")
         .text(String)
-        .attr("x", function(d) { return x(d) })
+        .attr("x", function(d) { return x(d.time) })
         .attr("y", 0)
         .attr("text-anchor", "middle")
                              
@@ -231,25 +234,25 @@ var make_better_chart = function(error, data)
          .attr("class", "yLabel")
          .text(String)
          .attr("x", 0)
-         .attr("y", function(d) { return -1 * y(d) })
+         .attr("y", function(d) { return -1 * y(d.elo) })
          .attr("text-anchor", "right")
 
     g.selectAll(".xTicks")
         .data(x.ticks(5))
         .enter().append("svg:line")
         .attr("class", "xTicks")
-        .attr("x1", function(d) { return x(d); })
+        .attr("x1", function(d) { return x(d.time); })
         .attr("y1", -1 * y(0))
-        .attr("x2", function(d) { return x(d); })
+        .attr("x2", function(d) { return x(d.time); })
         .attr("y2", -1 * y(-0.3))
          
      g.selectAll(".yTicks")
          .data(y.ticks(4))
          .enter().append("svg:line")
          .attr("class", "yTicks")
-         .attr("y1", function(d) { return -1 * y(d); })
+         .attr("y1", function(d) { return -1 * y(d.elo); })
          .attr("x1", x(-0.3))
-         .attr("y2", function(d) { return -1 * y(d); })
+         .attr("y2", function(d) { return -1 * y(d.elo); })
          .attr("x2", x(0))
 
 };
