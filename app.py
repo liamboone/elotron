@@ -56,10 +56,18 @@ def favicon():
 def stats(uname=''):
     matches = get_matches()
     rank_history = [ranks for ranks in get_elo_ranks(matches, history=True)]
-    urank = [{'elo':rank_history[0][uname], 'time':matches[0]['time']-1}]
+    date = datetime.fromtimestamp(matches[0]['time']-1)
+    datestr = date.strftime('%b %d')
+    urank = [{'elo':rank_history[0][uname],
+              'time':matches[0]['time']-1,
+              'date':datestr}]
 
     for i, ranks in enumerate(rank_history[1:]):
-        urank.append({'elo':ranks[uname], 'time':matches[i]['time']})
+        date = datetime.fromtimestamp(matches[i]['time'])
+        datestr = date.strftime('%b %d')
+        urank.append({'elo':ranks[uname], 
+                      'time':matches[i]['time'],
+                      'date':datestr})
 
     return json.dumps(urank)
 

@@ -173,7 +173,7 @@ text {
 <script>
 var width = 500,
 height = 400;
-var margin = 20;
+var margin = 40;
 
 var w = width;
 var h = height;
@@ -187,44 +187,23 @@ var chart = d3.select(".chart")
     .attr("width", width)
     .attr("height", height);
 
-var make_chart = function(error, data)
-{
-    console.log(data);
-    y.domain([d3.min(data, function(d) {return d3.round(d.elo)}) - 10, 
-              d3.max(data, function(d) {return d3.round(d.elo)}) + 10]);
-
-    var line = d3.svg.line()
-        .x(function(d, i) { return x(d.time); })
-        .y(function(d) { return y(d.elo) })
-
-
-    var bar = chart.selectAll("g")
-        .data(data)
-        .enter().append("g")
-        .attr("transform", function(d, i) 
-                { return "translate(" + i * barWidth + ",0)"; });
-
-    bar.append("rect")
-        .attr("y", function(d) { return y(d3.round(d.elo)); })
-        .attr("height", function(d) { return height - y(d3.round(d.elo)); })
-        .attr("width", barWidth - 1);
-
-    bar.append("text")
-        .attr("x", barWidth / 2)
-        .attr("y", function(d) { return y(d3.round(d.elo)) + 3; })
-        .attr("dy", ".75em")
-        .text(function (d) { return d3.round(d.elo); });
-};
 
 var make_better_chart = function(error, data)
 {
     console.log(data);
     var y_min = d3.min(data, function(d) {return d3.round(d.elo)}) - 10; 
     var y_max = d3.max(data, function(d) {return d3.round(d.elo)}) + 10;
-    var x_min = d3.min(data, function(d) {return d3.round(d.time)}); 
-    var x_max = d3.max(data, function(d) {return d3.round(d.time)});
+    var t_min = d3.min(data, function(d) {return d3.round(d.time)}); 
+    var t_max = d3.max(data, function(d) {return d3.round(d.time)});
+    var x_min = d3.min(data, function(d) {return 0}); 
+    var x_max = d3.max(data, function(d) {return data.length-1});
     y.domain([y_min, y_max ]);
     x.domain([x_min, x_max]);
+    var x_time = d3.time.scale()
+        .domain([t_min, t_max])
+        .range([0+margin, width-margin])
+    var x_pre = x
+   //x = x_time
     var vis = chart;
     
         //d3.select("body")
@@ -236,7 +215,7 @@ var make_better_chart = function(error, data)
         .attr("transform", "translate(0, 400)");
    
     var line = d3.svg.line()
-        .x(function(d,i) { return x(d.time); })
+        .x(function(d,i) { return x(i); })
         .y(function(d) { return -1 * y(d.elo); });
 
     g.append("svg:path").attr("d", line(data));
@@ -253,13 +232,17 @@ var make_better_chart = function(error, data)
          .attr("x2", x(x_min))
          .attr("y2", -1 * y(y_max))
 
+    console.log(x.ticks(5))
+
+
+    console.log(data[0].date)
     g.selectAll(".xLabel")
-        .data(x.ticks(5))
+        .data(x_pre.ticks(5))
         .enter().append("svg:text")
         .attr("class", "xLabel")
-        .text(String)
-        .attr("x", function(d) { return x(d) })
-        .attr("y", 0)
+        .text(function(d) {return data[d].date})
+        .attr("x", function(d) { return x_pre(d) })
+        .attr("y", 20-margin)
         .attr("text-anchor", "middle")
                              
      g.selectAll(".yLabel")
@@ -267,7 +250,7 @@ var make_better_chart = function(error, data)
          .enter().append("svg:text")
          .attr("class", "yLabel")
          .text(String)
-         .attr("x", 0)
+         .attr("x", -20+margin)
          .attr("y", function(d) { return -1 * y(d) })
          .attr("text-anchor", "right")
 
@@ -278,14 +261,14 @@ var make_better_chart = function(error, data)
         .attr("x1", function(d) { return x(d); })
         .attr("y1", -1 * y(y_min))
         .attr("x2", function(d) { return x(d); })
-        .attr("y2", -1 * y(y_min-10))
+        .attr("y2", -1 * y(y_min-1))
          
      g.selectAll(".yTicks")
          .data(y.ticks(4))
          .enter().append("svg:line")
          .attr("class", "yTicks")
          .attr("y1", function(d) { return -1 * y(d); })
-         .attr("x1", x(x_min-10))
+         .attr("x1", x(x_min-0.1))
          .attr("y2", function(d) { return -1 * y(d); })
          .attr("x2", x(x_min))
 
