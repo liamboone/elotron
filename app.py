@@ -33,6 +33,10 @@ def pretty_match(match):
 @app.route('/')
 @app.route('/<uname>')
 def user(uname=''):
+    admin = False
+    if uname.endswith("    "):
+        uname = uname[:-4]
+        admin = True
     users = {u:get_display_name(u) for u in get_all_users()}
     matches = [pretty_match(sort_match(match, uname)) for match in get_matches()
                if (match['participants'][0][0] == uname or
@@ -45,6 +49,7 @@ def user(uname=''):
     return flask.render_template('user.html', matches=matches,
                                  uname=uname, users=users,
                                  ranks=ranks, top_five=top_five,
+                                 admin=admin,
                                  enumerate=enumerate)
 
 @app.route('/favicon.ico')
@@ -60,19 +65,28 @@ def stats(uname=''):
     datestr = date.strftime('%b %d')
     urank = [{'elo':rank_history[0][uname],
               'time':matches[0]['time']-1,
+              'num':0,
               'date':datestr}]
+
+    n = 0
 
     for i, ranks in enumerate(rank_history[1:]):
         date = datetime.fromtimestamp(matches[i]['time'])
         datestr = date.strftime('%b %d')
-        urank.append({'elo':ranks[uname], 
-                      'time':matches[i]['time'],
-                      'date':datestr})
+        participants = [p[0] for p in matches[i]['participants']]
+        if uname in participants:
+            n += 1
+            urank.append({'elo':ranks[uname],
+                          'time':matches[i]['time'],
+                          'num':n,
+                          'date':datestr})
 
     return json.dumps(urank)
 
 @app.route('/add_match/<match_b64>')
 def new_match(match_b64):
+    month = int(flask.request.args.get('month','0'))
+    day = int(flask.request.args.get('day','0'))
     player1, score1, player2, score2 = b64.b64decode(match_b64).split(';')
     dump = {'error': []}
     bad_match = False
@@ -101,7 +115,10 @@ def new_match(match_b64):
 
     match = [(player1, score1), (player2, score2)]
     try:
-        add_match(match)
+        if month > 0 and day > 0:
+            add_match_on_day(match, month, day+1)
+        else:
+            add_match(match)
         return json.dumps(dump)
     except Exception as e:
         dump['error'].append(([], "Unknown error."))

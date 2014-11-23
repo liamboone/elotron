@@ -4,7 +4,7 @@ import calendar
 import os
 from itertools import permutations
 from random import randint
-import datetime
+from datetime import datetime
 
 try:
     db_name = os.environ['DB_NAME']
@@ -29,13 +29,13 @@ def timestamp_now():
     return calendar.timegm(time.gmtime())
 
 def timestamp_month_day(mnth, dy):
-    now = datetime.datetime.utcnow()
+    now = datetime.utcnow()
     then = now.replace(month=mnth, day=dy)
-    
-    epoch = datetime.datetime.utcfromtimestamp(0)
+
+    epoch = datetime.utcfromtimestamp(0)
     delta = then-epoch
 
-    utc_delta = datetime.datetime.now() - now + delta
+    utc_delta = datetime.now() - now + delta
     return int(round(delta.total_seconds()))
 
 def add_participant(display_name, login):

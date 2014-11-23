@@ -67,6 +67,10 @@ var postMatch = function ()
                     document.getElementById("player2").value + ";" +
                     document.getElementById("score2").value;
     var match_b64 = btoa(match_str).replace('/','_').replace('+','.');
+    {% if admin %}
+    match_b64 += "?month=" + document.getElementById("month").value + 
+                 "&day="   + document.getElementById("day").value
+    {% endif %}
     d3.json("/add_match/"+match_b64, function(error, data) {
                 if (error) return console.warn(error);
                 loopback = data;
@@ -136,6 +140,12 @@ var postMatch = function ()
         <br />
         {% endfor %}
     </div>
+    {% if admin %}
+    <div id="month-day-form-group" class="form-group">
+        <input id="month" class="form-control" placeholder="month">
+        <input id="day" class="form-control" placeholder="day">
+    </div>
+    {% endif %}
     <input onclick="postMatch();" type="button" 
         class="btn btn-primary" value="Add Match">
 </form>
@@ -143,10 +153,6 @@ var postMatch = function ()
 
 {% block stats_content %}
 <style>
-
-.chart rect {
-    fill: steelblue;
-}
 
 .chart text {
     fill: black;
@@ -169,114 +175,163 @@ text {
     font-size: 9pt;
 }
 </style>
-<svg class="chart"></svg>
+<div class="chart"></div>
 <script>
-var width = 500,
-height = 400;
-var margin = 40;
+var margin = {top: 30, 
+              right: 20,
+              bottom: 30,
+              left: 50};
+var width = 600 - margin.left - margin.right;
+var height = 400 - margin.bottom - margin.top;
 
-var w = width;
-var h = height;
+var bisectNum = d3.bisector(function(d) { return d.num; }).left;
 
-var y = d3.scale.linear()
-    .range([0+margin, height-margin]);
 var x = d3.scale.linear()
-    .range([0+margin, width-margin])
+    .range([0, width])
+var y = d3.scale.linear()
+    .range([height, 0]);
 
-var chart = d3.select(".chart")
-    .attr("width", width)
-    .attr("height", height);
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(0)
+    .tickFormat(function(d, i) { return ""; });
 
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(5);
 
-var make_better_chart = function(error, data)
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.num); })
+    .y(function(d) { return y(d.elo); });
+
+var svg = d3.select(".chart")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+var lineSvg = svg.append("g");
+
+var focus = svg.append("g")
+    .style("display", "none");
+
+var make_best_chart = function(error, data)
 {
     console.log(data);
-    var y_min = d3.min(data, function(d) {return d3.round(d.elo)}) - 10; 
-    var y_max = d3.max(data, function(d) {return d3.round(d.elo)}) + 10;
-    var t_min = d3.min(data, function(d) {return d3.round(d.time)}); 
-    var t_max = d3.max(data, function(d) {return d3.round(d.time)});
-    var x_min = d3.min(data, function(d) {return 0}); 
-    var x_max = d3.max(data, function(d) {return data.length-1});
-    y.domain([y_min, y_max ]);
-    x.domain([x_min, x_max]);
-    var x_time = d3.time.scale()
-        .domain([t_min, t_max])
-        .range([0+margin, width-margin])
-    var x_pre = x
-   //x = x_time
-    var vis = chart;
+
+    x.domain(d3.extent(data, function(d) { return d.num; }));
+    y.domain([d3.min(data, function(d) { return d.elo; })-10, 
+              d3.max(data, function(d) { return d.elo; })+10]);
     
-        //d3.select("body")
-        //.append("svg:svg")
-        //.attr("width", w)
-        //.attr("height", h)
-             
-    var g = vis.append("svg:g")
-        .attr("transform", "translate(0, 400)");
-   
-    var line = d3.svg.line()
-        .x(function(d,i) { return x(i); })
-        .y(function(d) { return -1 * y(d.elo); });
+    lineSvg.append("path")
+        .attr("class", "line")
+        .attr("d", valueline(data));
 
-    g.append("svg:path").attr("d", line(data));
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
 
-    g.append("svg:line")
-        .attr("x1", x(x_min))
-        .attr("y1", -1 * y(y_min))
-        .attr("x2", x(x_max))
-        .attr("y2", -1 * y(y_min))
-         
-     g.append("svg:line")
-         .attr("x1", x(x_min))
-         .attr("y1", -1 * y(y_min))
-         .attr("x2", x(x_min))
-         .attr("y2", -1 * y(y_max))
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
 
-    console.log(x.ticks(5))
+    focus.append("line")
+        .attr("class", "x")
+        .style("stroke", "blue")
+        .style("stroke-dasharray", "3,3")
+        .style("opacity", 0.5)
+        .attr("y1", 0)
+        .attr("y2", height);
 
+    focus.append("circle")
+        .attr("class", "y")
+        .style("fill", "none")
+        .style("stroke", "blue")
+        .attr("r", 4);
 
-    console.log(data[0].date)
-    g.selectAll(".xLabel")
-        .data(x_pre.ticks(5))
-        .enter().append("svg:text")
-        .attr("class", "xLabel")
-        .text(function(d) {return data[d].date})
-        .attr("x", function(d) { return x_pre(d) })
-        .attr("y", 20-margin)
-        .attr("text-anchor", "middle")
-                             
-     g.selectAll(".yLabel")
-         .data(y.ticks(4))
-         .enter().append("svg:text")
-         .attr("class", "yLabel")
-         .text(String)
-         .attr("x", -20+margin)
-         .attr("y", function(d) { return -1 * y(d) })
-         .attr("text-anchor", "right")
+    focus.append("text")
+        .attr("class", "y1")
+        .style("stroke", "white")
+        .style("stroke-width", "3.5px")
+        .style("opacity", 0.8)
+        .attr("dx", 8)
+        .attr("dy", "-.3em");
 
-    g.selectAll(".xTicks")
-        .data(x.ticks(5))
-        .enter().append("svg:line")
-        .attr("class", "xTicks")
-        .attr("x1", function(d) { return x(d); })
-        .attr("y1", -1 * y(y_min))
-        .attr("x2", function(d) { return x(d); })
-        .attr("y2", -1 * y(y_min-1))
-         
-     g.selectAll(".yTicks")
-         .data(y.ticks(4))
-         .enter().append("svg:line")
-         .attr("class", "yTicks")
-         .attr("y1", function(d) { return -1 * y(d); })
-         .attr("x1", x(x_min-0.1))
-         .attr("y2", function(d) { return -1 * y(d); })
-         .attr("x2", x(x_min))
+    focus.append("text")
+        .attr("class", "y2")
+        .attr("dx", 8)
+        .attr("dy", "-.3em");
 
+    focus.append("text")
+        .attr("class", "y3")
+        .style("stroke", "white")
+        .style("stroke-width", "3.5px")
+        .style("opacity", 0.8)
+        .attr("dx", 8)
+        .attr("dy", "1em");
+
+    focus.append("text")
+        .attr("class", "y4")
+        .attr("dx", 8)
+        .attr("dy", "1em");
+
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .on("mouseover", function() { focus.style("display", null); })
+        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mousemove", mousemove);
+
+    function mousemove() {
+        var x0 = x.invert(d3.mouse(this)[0]),
+            i = bisectNum(data, x0, 1),
+            d0 = data[i - 1],
+            d1 = data[i],
+            d = x0 - d0.num > d1.num - x0 ? d1 : d0;
+
+        focus.select("circle.y")
+            .attr("transform",
+                  "translate(" + x(d.num) + "," +
+                                 y(d.elo) + ")");
+
+        focus.select("text.y1")
+            .attr("transform",
+                  "translate(" + x(d.num) + "," +
+                                 y(d.elo) + ")")
+            .text(d3.round(d.elo));
+
+        focus.select("text.y2")
+            .attr("transform",
+                  "translate(" + x(d.num) + "," +
+                                 y(d.elo) + ")")
+            .text(d3.round(d.elo));
+
+        focus.select("text.y3")
+            .attr("transform",
+                  "translate(" + x(d.num) + "," +
+                                 y(d.elo) + ")")
+            .text(d.date);
+
+        focus.select("text.y4")
+            .attr("transform",
+                  "translate(" + x(d.num) + "," +
+                                 y(d.elo) + ")")
+            .text(d.date);
+
+        focus.select(".x")
+            .attr("transform",
+                  "translate(" + x(d.num) + "," +
+                                 y(d.elo) + ")")
+            .attr("y2", height - y(d.elo));
+    }
 };
 
 (function() 
 {
-d3.json("/{{uname}}/stats", make_better_chart);
+    d3.json("/{{uname}}/stats", make_best_chart);
 })();
 </script>
 {% endblock %}
