@@ -116,7 +116,7 @@ def new_match(match_b64):
     match = [(player1, score1), (player2, score2)]
     try:
         if month > 0 and day > 0:
-            add_match_on_day(match, month, day+1)
+            add_match_on_day(match, month, day)
         else:
             add_match(match)
         return json.dumps(dump)
