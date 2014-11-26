@@ -43,12 +43,12 @@ def user(uname=''):
                    match['participants'][1][0] == uname or uname == '')]
     matches.reverse()
     ranks = {u:r for u,r in get_elo_ranks(get_matches()).items()}
-    top_five = [(r,u) for u,r in ranks.items()]
-    top_five.sort(reverse=True)
-    top_five = top_five[:5]
+    leaderboard = [(r,u) for u,r in ranks.items()]
+    leaderboard.sort(reverse=True)
+    leaderboard = leaderboard[:10]
     return flask.render_template('user.html', matches=matches,
                                  uname=uname, users=users,
-                                 ranks=ranks, top_five=top_five,
+                                 ranks=ranks, leaderboard=leaderboard,
                                  admin=admin,
                                  enumerate=enumerate)
 

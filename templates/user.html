@@ -10,9 +10,9 @@
 
 {% block user_content %}
 {{super()}}
-<h3>Rankings</h3>
+<h3>Leaderboard</h3>
 <div class="list-group">
-    {% for rank, user in top_five %}
+    {% for rank, user in leaderboard %}
     <a href="/{{user}}"
         class="list-group-item {% if user == uname %}active{% endif %}">
         <span class="badge">{{ rank|round|int }}</span>
@@ -20,7 +20,7 @@
     </a>
     {% endfor %}
 </div>
-{% if uname != "" and ranks[uname] < top_five[-1][0] %}
+{% if uname != "" and ranks[uname] < leaderboard[-1][0] %}
 <div style="text-align:center;"><h4>⋮</h4></div><br />
 <div class="list-group">
     <a href="/{{uname}}"
