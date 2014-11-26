@@ -46,9 +46,34 @@ def add_participant(display_name, login):
 
     prts_coll.insert(doc)
 
+def check_match_duplicate(match_results, timestamp):
+    matches = get_matches()
+    
+    if not matches:
+        return False
+
+    last_match = matches[-1]
+
+    if not last_match:
+        return False
+
+    if abs(timestamp-last_match['time']) > 5:
+        return False
+
+    for name_score in match_results:
+        if name_score not in last_match['participants']:
+            return False
+
+    return True
+
 def _add_match(results, timestamp):
     names = []
     scores = []
+
+    # See if this is a double-add match
+    if check_match_duplicate(results, timestamp):
+        return
+    
     for (name, score) in results:
         if prts_coll.find({"login":name}).count() == 0:
             raise Exception
@@ -121,7 +146,12 @@ def setup_test_db():
     for one, two in permutations(get_all_users(), 2):
         if randint(0,1) == 1:
             one, two = two, one
-        add_match([(one, 21), (two, randint(0,19))])
+
+        # test duplicate detection
+        two_pts = randint(0, 19)
+        for i in range(4):
+            add_match([(one, 21), (two, two_pts)])
+        
         print one, 'vs', two
         time.sleep(1)
 
