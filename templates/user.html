@@ -77,6 +77,8 @@ var postMatch = function ()
                 console.log(data);
                 if (data.error.length == 0)
                 {
+                    document.getElementById("score1").value = "";
+                    document.getElementById("score2").value = "";
                     window.location.reload();
                 }
                 else
@@ -117,7 +119,7 @@ var postMatch = function ()
                     }
                 }
             });
-}
+};
 </script>
 <form id="add_match" class="form-inline" role="form">
     <div id="match_inputs">
