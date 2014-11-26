@@ -8,7 +8,7 @@ def get_elo_ranks(match_results, history=False):
 
 def _elo_ranks(match_results, history=False):
     # first pass, figure out which user names are in the match results
-    K = 15
+    K = 30
 
     user_list = []
     for match in match_results:
