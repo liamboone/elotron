@@ -48,23 +48,26 @@ def add_participant(display_name, login):
 
 def check_match_duplicate(match_results, timestamp):
     matches = get_matches()
-    
-    if not matches:
+
+    if len(matches) == 0:
         return False
 
-    last_match = matches[-1]
+    for match in reversed(matches):
+        if timestamp-match['time'] > 5:
+            break
 
-    if not last_match:
-        return False
+        if abs(timestamp-match['time']) < 5:
+            return True
 
-    if abs(timestamp-last_match['time']) > 5:
-        return False
+        identical = True
+        for name_score in match_results:
+            if name_score not in match['participants']:
+                identical = False
 
-    for name_score in match_results:
-        if name_score not in last_match['participants']:
-            return False
+        if identical:
+            return True
 
-    return True
+    return False
 
 def _add_match(results, timestamp):
     names = []
@@ -72,11 +75,11 @@ def _add_match(results, timestamp):
 
     # See if this is a double-add match
     if check_match_duplicate(results, timestamp):
-        return
+        raise Exception("Match flaged as duplicate.")
     
     for (name, score) in results:
         if prts_coll.find({"login":name}).count() == 0:
-            raise Exception
+            raise Exception("Username {0} not in database.".format(name))
         names.append(name)
         scores.append(score)
 

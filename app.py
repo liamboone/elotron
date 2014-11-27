@@ -121,7 +121,7 @@ def new_match(match_b64):
             add_match(match)
         return json.dumps(dump)
     except Exception as e:
-        dump['error'].append(([], "Unknown error."))
+        dump['error'].append(([], str(e)))
         return json.dumps(dump)
 
 if __name__ == '__main__':
