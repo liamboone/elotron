@@ -6,6 +6,9 @@ from itertools import permutations
 from random import randint
 from datetime import datetime
 
+class DuplicateError(Exception):
+    pass
+
 try:
     db_name = os.environ['DB_NAME']
 except KeyError:
@@ -75,8 +78,8 @@ def _add_match(results, timestamp):
 
     # See if this is a double-add match
     if check_match_duplicate(results, timestamp):
-        raise Exception("Match flaged as duplicate.")
-    
+        raise DuplicateError("Match flaged as duplicate.")
+
     for (name, score) in results:
         if prts_coll.find({"login":name}).count() == 0:
             raise Exception("Username {0} not in database.".format(name))

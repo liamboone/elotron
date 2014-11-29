@@ -57,6 +57,12 @@ def favicon():
     return flask.send_from_directory(os.path.join(app.root_path, 'static'),
                                'ico/favicon.ico')
 
+def matchstr(match):
+    participants = sorted(match['participants'], key=lambda x: x[1])
+    return ["{}: {}".format(get_display_name(p[0]), p[1])
+            for p in participants]
+
+
 @app.route('/<uname>/stats')
 def stats(uname=''):
     matches = get_matches()
@@ -66,7 +72,8 @@ def stats(uname=''):
     urank = [{'elo':rank_history[0][uname],
               'time':matches[0]['time']-1,
               'num':0,
-              'date':datestr}]
+              'date':datestr,
+              'match':''}]
 
     n = 0
 
@@ -79,7 +86,8 @@ def stats(uname=''):
             urank.append({'elo':ranks[uname],
                           'time':matches[i]['time'],
                           'num':n,
-                          'date':datestr})
+                          'date':datestr,
+                          'match':matchstr(matches[i])})
 
     return json.dumps(urank)
 
@@ -119,10 +127,12 @@ def new_match(match_b64):
             add_match_on_day(match, month, day)
         else:
             add_match(match)
-        return json.dumps(dump)
+    except DuplicateError:
+        pass
     except Exception as e:
         dump['error'].append(([], str(e)))
-        return json.dumps(dump)
+
+    return json.dumps(dump)
 
 if __name__ == '__main__':
     app.run()
