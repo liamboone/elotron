@@ -76,8 +76,9 @@ def check_match_duplicate(match_results, timestamp):
         if timestamp-match['time'] > 5:
             break
 
-        if abs(timestamp-match['time']) < 5:
-            return True
+        # This seems bad and it's Liam's fault
+        #if abs(timestamp-match['time']) < 5:
+        #    return True
 
         identical = True
         for name_score in match_results:
