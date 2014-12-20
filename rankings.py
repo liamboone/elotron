@@ -13,7 +13,7 @@ def _elo_ranks(match_results, history=False):
     K = get_config('K', 15)
     K_new = get_config('K_new_player', 30)
 
-    new_player_period = get_config('new_participant_period', 0)
+    new_player_period = get_config('new_player_period', 0)
 
     user_list = []
     for match in match_results:
