@@ -16,6 +16,7 @@ except KeyError:
 
 participants_collection_name = 'participants'
 matches_collection_name = 'matches'
+config_collection_name = 'config'
 
 try:
     mongo_uri = os.environ['MONGOHQ_URL']
@@ -27,6 +28,7 @@ client = MongoClient(mongo_uri)
 db = client[db_name]
 prts_coll = db[participants_collection_name]
 matches_coll = db[matches_collection_name]
+config_coll = db[config_collection_name]
 
 def timestamp_now():
     return calendar.timegm(time.gmtime())
@@ -40,6 +42,21 @@ def timestamp_month_day(mnth, dy):
 
     utc_delta = datetime.now() - now + delta
     return int(round(delta.total_seconds()))
+
+def get_config(name, default_val=None):
+    doc = config_coll.find_one({name:{'$exists':True}})
+    if doc == None:
+        return default_val
+    else:
+        return doc[name]
+    
+def add_config(name, val):
+    if config_coll.find({name:{'$exists':True}}).count() > 0:
+        raise Exception
+
+    doc = {name:val}
+
+    config_coll.insert(doc)
 
 def add_participant(display_name, login):
     if prts_coll.find({"login":login}).count() > 0:
@@ -138,9 +155,16 @@ def _clear_matches():
 def _clear_participants():
     prts_coll.remove({})
 
+def _clear_config():
+    config_coll.remove({})
+
 def setup_test_db():
     _clear_participants()
     _clear_matches()
+    _clear_config()
+
+    add_config('K', 30)
+    add_config('new_participant_period', 5)
 
     add_participant('Kaylee', 'ktrain')
     add_participant('Finn', 'fbomb')
@@ -155,14 +179,24 @@ def setup_test_db():
 
         # test duplicate detection
         two_pts = randint(0, 19)
-        for i in range(4):
-            add_match([(one, 21), (two, two_pts)])
         
+        for i in range(4):
+            try:
+                add_match([(one, 21), (two, two_pts)])
+                print 'Match ok: ' + str([(one, 21), (two, two_pts)])
+            except DuplicateError:
+                 print 'Caught duplicate on match: ' + str([(one, 21), (two, two_pts)])
+
         print one, 'vs', two
         time.sleep(1)
 
 if __name__ == '__main__':
     setup_test_db()
+    print 'Getting config'
+    print 'K-value: ' + str(get_config('K'))
+    print 'New player quarantine period: ' + str(get_config('new_participant_period'))
+    print 'Invalid config: ' + str(get_config('blarg'))
+
     print 'Getting matches'
     print get_matches()
 

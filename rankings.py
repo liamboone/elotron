@@ -1,3 +1,5 @@
+from elotron_backend import get_config
+
 def get_elo_ranks(match_results, history=False):
     if history:
         return [rank for rank in _elo_ranks(match_results, history)]
@@ -8,7 +10,10 @@ def get_elo_ranks(match_results, history=False):
 
 def _elo_ranks(match_results, history=False):
     # first pass, figure out which user names are in the match results
-    K = 30
+    K = get_config('K', 15)
+    K_new = get_config('K_new_player', 30)
+
+    new_player_period = get_config('new_participant_period', 0)
 
     user_list = []
     for match in match_results:
@@ -17,9 +22,12 @@ def _elo_ranks(match_results, history=False):
                 user_list.append(name)
 
     ranks = {}
+    num_games = {}
+
     for user in user_list:
         ranks[user] = 1000
-
+        num_games[user] = 0
+    
     yield ranks
 
     for match in match_results:
@@ -47,8 +55,19 @@ def _elo_ranks(match_results, history=False):
         if history:
             ranks = dict(ranks)
 
-        ranks[name_a] = ranks[name_a] + K*(Sa-Ea)
-        ranks[name_b] = ranks[name_b] + K*(Sb-Eb)
+        K_a = K
+        K_b = K
+        
+        if num_games[name_a] < new_player_period:
+            K_a = K_new
+        if num_games[name_b] < new_player_period:
+            K_b = K_new
+
+        ranks[name_a] = ranks[name_a] + K_a*(Sa-Ea)
+        ranks[name_b] = ranks[name_b] + K_b*(Sb-Eb)
+
+        num_games[name_a] += 1
+        num_games[name_b] += 1
 
         yield ranks
 
