@@ -49,7 +49,7 @@ def user(uname=''):
     leaderboard = [(r,u) for u,r in ranks.items()]
     leaderboard.sort(reverse=True)
     leaderboard = leaderboard[:leaderboard_len]
-    return flask.render_template('user.html', matches=matches[matches_per_page],
+    return flask.render_template('user.html', matches=matches[:matches_per_page],
                                  uname=uname, users=users,
                                  ranks=ranks, leaderboard=leaderboard,
                                  admin=admin,
