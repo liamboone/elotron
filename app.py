@@ -33,6 +33,9 @@ def pretty_match(match):
 @app.route('/')
 @app.route('/<uname>')
 def user(uname=''):
+    leaderboard_len = get_config('leaderboard_length', 10)
+    matches_per_page = get_config('matches_per_page', 25)
+
     admin = False
     if uname.endswith("    "):
         uname = uname[:-4]
@@ -45,8 +48,8 @@ def user(uname=''):
     ranks = {u:r for u,r in get_elo_ranks(get_matches()).items()}
     leaderboard = [(r,u) for u,r in ranks.items()]
     leaderboard.sort(reverse=True)
-    leaderboard = leaderboard[:10]
-    return flask.render_template('user.html', matches=matches,
+    leaderboard = leaderboard[:leaderboard_len]
+    return flask.render_template('user.html', matches=matches[matches_per_page],
                                  uname=uname, users=users,
                                  ranks=ranks, leaderboard=leaderboard,
                                  admin=admin,
