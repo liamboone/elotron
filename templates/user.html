@@ -43,26 +43,20 @@
                     <li>
                     <a href="/{{player[0]}}" style="text-decoration:none">
                         <h4>
+                            <b>{{ users[player[0]] }}</b>
+                            {{ player[1] }}
                         {% if differential[m][player[0]][0] < 0 %}
-                        <span class="label label-danger">
+                        <span class="badge alert-danger">
                             <span class="glyphicon glyphicon-arrow-down">
                             </span>
                         {% elif differential[m][player[0]][0] > 0 %}
-                        <span class="label label-success">
+                        <span class="badge alert-success">
                             <span class="glyphicon glyphicon-arrow-up">
                             </span>
                         {% else %}
-                        <span class="label label-default">
+                        <span class="badge">
                         {% endif %}
                             {{ differential[m][player[0]][0]|round|abs|int }}
-                        </span>
-                        {% if i == match.winner %}
-                        <span class="label label-primary">
-                        {% else %}
-                        <span class="label label-default">
-                        {% endif %}
-                        <em>{{ users[player[0]] }}</em>
-                            {{ player[1] }}
                         </span>
                         </h4>
                     </a></li>
