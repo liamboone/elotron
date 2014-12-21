@@ -41,18 +41,31 @@ def user(uname=''):
         uname = uname[:-4]
         admin = True
     users = {u:get_display_name(u) for u in get_all_users()}
-    matches = [pretty_match(sort_match(match, uname)) for match in get_matches()
-               if (match['participants'][0][0] == uname or
-                   match['participants'][1][0] == uname or uname == '')]
+
+    matches = []
+    differential = []
+    rank_history = get_elo_ranks(get_matches(), True)
+
+    for i, match in enumerate(get_matches()):
+        if (match['participants'][0][0] == uname or
+            match['participants'][1][0] == uname or
+            uname == ''):
+            matches.append(pretty_match(sort_match(match, uname)))
+            differential.append({u:(rank_history[i+1][u] - rank_history[i][u],
+                                    rank_history[i+1][u])
+                                 for u in get_all_users()})
+
     matches.reverse()
-    ranks = {u:r for u,r in get_elo_ranks(get_matches()).items()}
+    differential.reverse()
+    differential = differential[:(matches_per_page+1)]
+    ranks = {u:r for u,r in rank_history[-1].items()}
     leaderboard = [(r,u) for u,r in ranks.items()]
     leaderboard.sort(reverse=True)
-    leaderboard = leaderboard[:leaderboard_len]
-    return flask.render_template('user.html', matches=matches[:matches_per_page],
-                                 uname=uname, users=users,
-                                 ranks=ranks, leaderboard=leaderboard,
-                                 admin=admin,
+    return flask.render_template('user.html',
+                                 matches=matches[:matches_per_page],
+                                 leaderboard=leaderboard[:leaderboard_len],
+                                 uname=uname, users=users, ranks=ranks,
+                                 admin=admin, differential=differential,
                                  enumerate=enumerate)
 
 @app.route('/favicon.ico')

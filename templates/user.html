@@ -34,7 +34,7 @@
 
 {% block match_content %}
 {{super()}}
-    {% for match in matches %}
+    {% for m, match in enumerate(matches) %}
     <div id="match" class="panel panel-default">
         <div id="participants" class="panel-body">
             <div style="float:left">
@@ -42,11 +42,30 @@
                     {% for i, player in enumerate(match.participants) %}
                     <li>
                     <a href="/{{player[0]}}">
-                    {% if i == match.winner %}<b>{% endif %}
-                        {{ users[player[0]] }}
-                        {% if i == match.winner %}</b>{% endif %}
-                    <span class="badge {% if i == match.winner %}alert-info{% endif %}">{{ player[1] }}</span>
-                </a></li>
+                        <h4>
+                        {% if differential[m][player[0]][0] < 0 %}
+                        <span class="label label-danger">
+                            <span class="glyphicon glyphicon-arrow-down">
+                            </span>
+                        {% elif differential[m][player[0]][0] > 0 %}
+                        <span class="label label-success">
+                            <span class="glyphicon glyphicon-arrow-up">
+                            </span>
+                        {% else %}
+                        <span class="label label-default">
+                        {% endif %}
+                            {{ differential[m][player[0]][0]|round|abs|int }}
+                        </span>
+                        {% if i == match.winner %}
+                        <span class="label label-primary">
+                        {% else %}
+                        <span class="label label-default">
+                        {% endif %}
+                            {{ users[player[0]] }}
+                            {{ player[1] }}
+                        </span>
+                        </h4>
+                    </a></li>
                     {% endfor %}
                 </ul>
             </div>
