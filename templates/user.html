@@ -41,7 +41,7 @@
                 <ul id="participant" class="list-inline">
                     {% for i, player in enumerate(match.participants) %}
                     <li>
-                    <a href="/{{player[0]}}">
+                    <a href="/{{player[0]}}" style="text-decoration:none">
                         <h4>
                         {% if differential[m][player[0]][0] < 0 %}
                         <span class="label label-danger">
@@ -61,7 +61,7 @@
                         {% else %}
                         <span class="label label-default">
                         {% endif %}
-                            {{ users[player[0]] }}
+                        <em>{{ users[player[0]] }}</em>
                             {{ player[1] }}
                         </span>
                         </h4>
