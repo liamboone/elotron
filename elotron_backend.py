@@ -62,7 +62,9 @@ def add_participant(display_name, login):
     if prts_coll.find({"login":login}).count() > 0:
         raise Exception
 
-    doc = {'display_name': display_name,'login': login,'joined_time': timestamp_now()}
+    doc = {'display_name': display_name,
+           'login': login,
+           'joined_time': timestamp_now()}
 
     prts_coll.insert(doc)
 
@@ -72,13 +74,22 @@ def check_match_duplicate(match_results, timestamp):
     if len(matches) == 0:
         return False
 
+    # Iterate through matches, most to least recent
     for match in reversed(matches):
-        if timestamp-match['time'] > 5:
-            break
+        if timestamp-match['time'] > 5: # if a match is more than
+            break                       # 5 seconds in the past, we're good
 
-        # This seems bad and it's Liam's fault
-        #if abs(timestamp-match['time']) < 5:
-        #    return True
+        if timestamp-match['time'] < -5: # This check to see if we're more
+            continue                     # than 5 seconds in the
+                                         # _future_ is needed because
+                                         # when clocks and the internet
+                                         # mix, weird shit can happen
+
+        # At this point we know that the new match is within 5 seconds
+
+        # With ZDR on we don't even care if the match is actually a dup
+        if get_config("zealous_duplicate_rejection", False):
+            return True
 
         identical = True
         for name_score in match_results:
