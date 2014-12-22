@@ -9,14 +9,22 @@
 {% endblock %}
 
 {% block user_content %}
+{% set new_player_found = [] %}
 {{super()}}
 <h3>Leaderboard</h3>
 <div class="list-group">
-    {% for rank, user in leaderboard %}
+    {% for rank, user, num_games in leaderboard %}
     <a href="/{{user}}"
         class="list-group-item {% if user == uname %}active{% endif %}">
         <span class="badge">{{ rank|round|int }}</span>
         {{ users[user] }}
+        {% if num_games < new_player_period %}
+        {% if new_player_found.append(1) %}{% endif %}
+        {# jinja scoping is odd. The above gets around some rules #}
+        {# so we can detect if there are any new players and #}
+        {# display the footnote #}
+            *
+        {% endif %}
     </a>
     {% endfor %}
 </div>
@@ -29,6 +37,11 @@
         {{ users[uname] }}
     </a>
 </div>
+{% endif %}
+{% if new_player_found %}
+<p><small>
+* Played less than {{new_player_period}} games.
+</small></p>
 {% endif %}
 {% endblock %}
 

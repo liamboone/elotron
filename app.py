@@ -44,10 +44,12 @@ def user(uname=''):
 
     matches = []
     differential = []
-    rank_history = get_elo_ranks(get_matches(), True)
+    rank_history, games_played = zip(*get_elo_ranks(get_matches(), True))
 
     rank_history = [{u:round(rank[u]) for u in get_all_users()}
                     for rank in rank_history]
+
+    new_player_period = get_config('new_player_period', 0)
 
     for i, match in enumerate(get_matches()):
         if (match['participants'][0][0] == uname or
@@ -62,13 +64,14 @@ def user(uname=''):
     differential.reverse()
     differential = differential[:(matches_per_page+1)]
     ranks = {u:r for u,r in rank_history[-1].items()}
-    leaderboard = [(r,u) for u,r in ranks.items()]
+    leaderboard = [(r,u,games_played[-1][u]) for u,r in ranks.items()]
     leaderboard.sort(reverse=True)
     return flask.render_template('user.html',
                                  matches=matches[:matches_per_page],
                                  leaderboard=leaderboard[:leaderboard_len],
                                  uname=uname, users=users, ranks=ranks,
                                  admin=admin, differential=differential,
+                                 new_player_period=new_player_period,
                                  enumerate=enumerate)
 
 @app.route('/favicon.ico')
@@ -85,7 +88,7 @@ def matchstr(match):
 @app.route('/<uname>/stats')
 def stats(uname=''):
     matches = get_matches()
-    rank_history = [ranks for ranks in get_elo_ranks(matches, history=True)]
+    rank_history = [r for r, n in get_elo_ranks(matches, history=True)]
     rank_history = [{u:round(rank[u]) for u in get_all_users()}
                     for rank in rank_history]
 

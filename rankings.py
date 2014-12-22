@@ -2,11 +2,11 @@ from elotron_backend import get_config
 
 def get_elo_ranks(match_results, history=False):
     if history:
-        return [rank for rank in _elo_ranks(match_results, history)]
+        return [(r, n) for r, n in _elo_ranks(match_results, history)]
     else:
-        for rank in _elo_ranks(match_results, history):
+        for r, n in _elo_ranks(match_results, history):
             pass
-        return rank
+        return r, n
 
 def _elo_ranks(match_results, history=False):
     # first pass, figure out which user names are in the match results
@@ -27,8 +27,8 @@ def _elo_ranks(match_results, history=False):
     for user in user_list:
         ranks[user] = 1000
         num_games[user] = 0
-    
-    yield ranks
+
+    yield (ranks, num_games)
 
     for match in match_results:
         participants = match['participants']
@@ -57,7 +57,7 @@ def _elo_ranks(match_results, history=False):
 
         K_a = K
         K_b = K
-        
+
         if num_games[name_a] < new_player_period:
             K_a = K_new
         if num_games[name_b] < new_player_period:
@@ -69,7 +69,7 @@ def _elo_ranks(match_results, history=False):
         num_games[name_a] += 1
         num_games[name_b] += 1
 
-        yield ranks
+        yield (ranks, num_games)
 
 if __name__ == '__main__':
     import elotron_backend as eb
