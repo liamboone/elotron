@@ -52,7 +52,6 @@
         <div id="participants" class="panel-body">
             {% if uname != '' %}
             <div style="float:left" class="right-divider">
-                <h4>
                 {% if differential[m][uname][0] < 0 %}
                 <span class="badge alert-danger">
                 {{ differential[m][uname][1]|int }}
@@ -69,15 +68,13 @@
                 {% endif %}
                 {{ differential[m][uname][0]|abs|int }}
                 </span>
-                </h4>
             </div>
             {% endif %}
             <div style="float:left">
-                <ul id="participant" class="list-inline">
                     {% for i, player in enumerate(match.participants) %}
-                    <li>
-                    <a href="/{{player[0]}}" style="text-decoration:none">
-                        <h4>
+                    {% if i != 0 %}<small> vs </small>{% endif %}
+                    <a href="/{{player[0]}}" 
+                        style="text-decoration:none;">
                             <b>{{ users[player[0]] }}</b>
                             {% if i == match.winner %}
                             <span class="badge alert-info">
@@ -86,9 +83,7 @@
                             {% endif %}
                             {{ player[1] }}
                             </span>
-                        </h4>
                     </a>
-                    </li>
                     {% endfor %}
                 </ul>
             </div>
