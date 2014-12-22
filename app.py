@@ -46,6 +46,9 @@ def user(uname=''):
     differential = []
     rank_history = get_elo_ranks(get_matches(), True)
 
+    rank_history = [{u:round(rank[u]) for u in get_all_users()}
+                    for rank in rank_history]
+
     for i, match in enumerate(get_matches()):
         if (match['participants'][0][0] == uname or
             match['participants'][1][0] == uname or
@@ -83,6 +86,9 @@ def matchstr(match):
 def stats(uname=''):
     matches = get_matches()
     rank_history = [ranks for ranks in get_elo_ranks(matches, history=True)]
+    rank_history = [{u:round(rank[u]) for u in get_all_users()}
+                    for rank in rank_history]
+
     date = datetime.fromtimestamp(matches[0]['time']-1)
     datestr = date.strftime('%b %d')
     urank = [{'elo':rank_history[0][uname],
