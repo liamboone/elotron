@@ -38,7 +38,7 @@
     <div id="match" class="panel panel-default">
         <div id="participants" class="panel-body">
             {% if uname != '' %}
-            <div style="float:left">
+            <div style="float:left" class="right-divider">
                 <h4>
                 {% if differential[m][uname][0] < 0 %}
                 <span class="badge alert-danger">
@@ -59,7 +59,7 @@
                 </h4>
             </div>
             {% endif %}
-            <div style="float:left" class="left-divider">
+            <div style="float:left">
                 <ul id="participant" class="list-inline">
                     {% for i, player in enumerate(match.participants) %}
                     <li>
