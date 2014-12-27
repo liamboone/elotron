@@ -421,3 +421,243 @@ var make_best_chart = function(error, data)
 })();
 </script>
 {% endblock %}
+
+{% block mikestats %}
+<div id="chart-timeline" style=""></div>
+<div id="chart-opponents" style="float:right"><div style="position:absolute;top:315px;padding-left:75px;text-align:center">Number of Games<br/>Against Each Opponent</div></div>
+
+<div id="chart-pointsTaken" style="margin: 30px 5px 10px 10px"></div>
+<div id="chart-winsLosses" style="margin: 30px 15px 10px 0px"></div>
+<div id="chart-pointsTakenElo" style="margin: 30px 0px 10px 30px"></div>
+
+<div style="clear:both;padding:50px">
+	<table id="dc-data-table">
+		<thead>
+			<tr class="header">
+				<th>Day</th>
+				<th>Your rating</th>
+				<th>Your score</th>
+				<th>Opponent's score</th>
+				<th>Opponent's rating</th>
+			</tr>
+		</thead>
+	</table>
+</div>
+<script>
+/*  FIX for brush filtering on composite chart, from: https://groups.google.com/forum/#!topic/dc-js-user-group/yI6_cbvgfbU  */
+(function() {
+    var compositeChart = dc.compositeChart;
+    dc.compositeChart = function(parent, chartGroup) {
+        var _chart = compositeChart(parent, chartGroup);
+        
+        _chart._brushing = function () {
+            var extent = _chart.extendBrush();
+            var rangedFilter = null;
+            if(!_chart.brushIsEmpty(extent)) {
+                rangedFilter = dc.filters.RangedFilter(extent[0], extent[1]);
+            }
+
+            dc.events.trigger(function () {
+                if (!rangedFilter) {
+                    _chart.filter(null);
+                } else {
+                    _chart.replaceFilter(rangedFilter);
+                }
+                _chart.redrawGroup();
+            }, dc.constants.EVENT_DELAY);
+        };
+        
+        return _chart;
+    };
+})();
+/*  END fix for brush filtering composite charts */
+
+/* custom functions for crossfilter reducing by average */
+function reduceAddAvg(attr) {
+  return function(p,v) {
+    ++p.count
+    p.sum += v[attr];
+    p.avg = p.sum/p.count;
+    return p;
+  };
+}
+function reduceRemoveAvg(attr) {
+  return function(p,v) {
+    --p.count
+    p.sum -= v[attr];
+    p.avg = p.sum/p.count;
+    return p;
+  };
+}
+function reduceInitAvg() {
+  return {count:0, sum:0, avg:0};
+}
+/*  END custom functions for reducing */
+
+var data = [
+	{date: "12/25/2012T12:00:00", player1: "Mike", player2: "Kyle", player1elo: 1200, player2elo: 950, player1score: 21, player2score: 19},
+	{date: "12/25/2012T12:00:10", player1: "Mike", player2: "Pavan", player1elo: 1050, player2elo: 800, player1score: 21, player2score: 17},
+	{date: "12/25/2012T12:00:20", player1: "Mike", player2: "Liam", player1elo: 1111, player2elo: 950, player1score: 18, player2score: 21},
+	{date: "12/28/2012T05:00:10", player1: "Mike", player2: "Kirk", player1elo: 1100, player2elo: 1050, player1score: 21, player2score: 23},
+	{date: "12/29/2012T06:00:10", player1: "Mike", player2: "Liam", player1elo: 950, player2elo: 1100, player1score: 21, player2score: 17},
+	{date: "12/30/2012T12:00:10", player1: "Mike", player2: "John", player1elo: 900, player2elo: 950, player1score: 3, player2score: 21},
+	{date: "12/31/2012T12:00:10", player1: "Mike", player2: "Liam", player1elo: 850, player2elo: 1000, player1score: 21, player2score: 17},
+	{date: "1/5/2013T12:00:10", player1: "Mike", player2: "Kyle", player1elo: 975, player2elo: 950, player1score: 14, player2score: 21},
+	{date: "1/7/2013T12:00:10", player1: "Mike", player2: "Liam", player1elo: 1175, player2elo: 750, player1score: 21, player2score: 13},
+	{date: "1/8/2013T03:00:10", player1: "Mike", player2: "Kyle", player1elo: 1055, player2elo: 800, player1score: 15, player2score: 21},
+	{date: "1/9/2013T07:00:10", player1: "Mike", player2: "John", player1elo: 850, player2elo: 950, player1score: 2, player2score: 21},
+	{date: "1/10/2013T04:00:10", player1: "Mike", player2: "Kyle", player1elo: 1050, player2elo: 950, player1score: 21, player2score: 17},
+];
+var mike_best_chart = function(error, data)
+{
+var pong = crossfilter(data);
+var all = pong.groupAll();
+var parseDate = d3.time.format("%m/%d/%YT%H:%M:%S").parse;
+var cumulWins = 0;
+var cumulLosses = 0;
+data.forEach(function(d) {
+	d.date = parseDate(d.date);
+	d.diff = d.player1score - d.player2score;
+	if (d.player1score > d.player2score) {
+		d.win = "Wins";
+		cumulWins += 1;
+	} else {
+		d.win = "Losses";
+		cumulLosses = cumulLosses - 1;
+	}
+	d.cumulWin = cumulWins;
+	d.cumulLoss = cumulLosses;
+
+})
+
+var dateDim = pong.dimension(function(d) {return d.date;});
+var zeroGroup = dateDim.group().reduceSum(function(d) {return 0;});
+var oppDim = pong.dimension(function(d) {return d.player2;});
+var oppGroup = oppDim.group();
+
+/*  *** Used for cumulative points scored against each elo rating */
+var elo2Dim = pong.dimension(function(d) {return d.player2elo;});
+var elo2group = elo2Dim.group().reduce(reduceAddAvg('player1score'),reduceRemoveAvg('player1score'),reduceInitAvg);
+
+
+var winDim = pong.dimension(function(d) {return d.win;});
+var winGroup = winDim.group();
+
+var pointsDim = pong.dimension(function(d) {return d.player1score;});
+var pointsGroup = pointsDim.group();
+
+//currently unused
+var pointsTakenGroup = oppDim.group().reduceSum(dc.pluck('player1score'));
+
+//currently unused
+var pointsGivenGroup = oppDim.group().reduceSum(dc.pluck('player2score'));
+
+var eloGroup = dateDim.group().reduceSum(dc.pluck('player1elo'));
+var cumulWinsGroup = dateDim.group().reduceSum(dc.pluck('player1score'));
+var cumulLossesGroup = dateDim.group().reduceSum(dc.pluck('player2score'));
+var ret=0;
+var diffGroup = dateDim.group().reduceSum(function(d) {return d.diff});
+var diffPlusGroup = dateDim.group().reduceSum(function(d) {d.diff>0? ret = d.diff:ret=0; return ret});
+var diffMinusGroup = dateDim.group().reduceSum(function(d) {d.diff<0? ret = d.diff:ret=0; return ret});
+
+//offset necessary for the timeline graph to show all games, even at the beginning/end
+var minDate = d3.time.day.offset(dateDim.bottom(1)[0].date, -1);
+var maxDate = d3.time.day.offset(dateDim.top(1)[0].date, 1);
+
+var timelineChart = dc.compositeChart("#chart-timeline");
+timelineChart
+	.width(900).height(200)
+	.dimension(dateDim)
+	.y(d3.scale.linear().domain([-21,21]))
+	.yAxisLabel('End-game Point Differential')
+	.x(d3.time.scale().domain([minDate,maxDate]))
+	.compose([
+		dc.barChart(timelineChart).group(diffPlusGroup).ordinalColors(['green']).centerBar(true),
+		dc.barChart(timelineChart).group(diffMinusGroup).ordinalColors(['darkred']).centerBar(true),
+		dc.lineChart(timelineChart).group(zeroGroup).ordinalColors(['lightgray']),
+		dc.bubbleChart(timelineChart).group(diffGroup).colorAccessor(function(d) {var val=0;d.value<0?val=0:val=1;return val;}).ordinalColors(['green','darkred']).radiusValueAccessor(function(d) {return Math.abs(d.value)/4}).minRadiusWithLabel(40).r(d3.scale.linear().domain([5, 200]))
+		])
+
+var winsLossesChart = dc.pieChart("#chart-winsLosses");
+winsLossesChart
+	.width(150).height(150)
+	.dimension(winDim)
+	.group(winGroup)
+	.label(function(d) {if(all.value){return d.key + " " + Math.round(d.value / all.value()*100) + '%';}})
+	.ordinalColors(['darkred','green']);
+
+var opponentsChart = dc.pieChart("#chart-opponents");
+opponentsChart
+	.width(300).height(300)
+	.dimension(oppDim)
+	.group(oppGroup)
+	.label(function(d) {if(all.value){return d.key + " (" + d.value + ")"}})
+	.innerRadius(30);
+
+/* *** for number of games in which each amount of points was achieved ***/
+var pointsTakenChart = dc.barChart("#chart-pointsTaken");
+pointsTakenChart
+	.width(350).height(200)
+	.dimension(pointsDim)
+	.group(pointsGroup)
+	.x(d3.scale.linear().domain([0,pointsDim.top(1)[0].player1score+2]))
+	.centerBar(true)
+	.xAxisLabel("My Points Scored in Game")
+	.yAxisLabel("Number of Games")
+	;
+
+
+/* ***  for cumulative points scored against each elo rating ***/
+var pointsTaken2Chart = dc.scatterPlot("#chart-pointsTakenElo");
+pointsTaken2Chart
+	.width(350).height(200)
+	.dimension(elo2Dim)
+	.group(elo2group)
+	.keyAccessor(function(d) {return d.key})
+	.valueAccessor(function (d){var tempAvg=0; d.value.avg? tempAvg=d.value.avg: tempAvg=0; return tempAvg})
+	.x(d3.scale.linear().domain([600,1400]))
+	.y(d3.scale.linear().domain([5,22]))
+	.xAxisLabel("Opponent's ELO Rating")
+	.yAxisLabel("My Avg Points Scored")
+	.symbolSize('5')
+	.highlightedSize('7')
+	;
+
+var datatable = dc.dataTable("#dc-data-table");
+datatable
+	.dimension(dateDim)
+	.group(function (d) {return d.player2})
+	.columns([
+		function(d) {return d.date;},
+		function(d) {return d.player1elo;},
+		function(d) {return d.player1score;},
+		function(d) {return d.player2score;},
+		function(d) {return d.player2elo;}
+		])
+	.renderlet(function (table) {
+		$("#dc-data-table tr").each(function (index, Element) {
+			if ($(Element).children("td").length>1) {
+				var yourScore = parseInt($(Element).children("td")[2].innerHTML);		
+				var oppScore = parseInt($(Element).children("td")[3].innerHTML);
+				$(Element).css("text-align","center");
+				if (yourScore > oppScore) {
+					$(Element).css("background-color", "lightgreen");
+				} else {
+					$(Element).css("background-color", "pink");
+				}
+			}
+		})
+	});
+
+dc.renderAll();
+};
+
+(function() 
+{
+    d3.json("/{{uname}}/stats", mike_best_chart);
+})();
+</script>
+
+
+
+{% endblock %}

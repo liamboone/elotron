@@ -93,6 +93,65 @@ def stats(uname=''):
                     for rank in rank_history]
 
     date = datetime.fromtimestamp(matches[0]['time']-1)
+    datestr = date.strftime('%m/%d/%YT%H:%M:%S')
+    urankl = [{'elo':rank_history[0][uname],
+              'time':matches[0]['time']-1,
+              'num':0,
+              'date':datestr,
+              'match':''}]
+    urankl = [{'player1':rank_history[0][uname],
+              'time':matches[0]['time']-1,
+              'num':0,
+              'date':datestr,
+              'match':''}]
+    #print matches
+    #print rank_history[0]
+    n = 0
+    urank = []
+    for i, ranks in enumerate(rank_history[1:]):
+        date = datetime.fromtimestamp(matches[i]['time'])
+        datestr = date.strftime('%m/%d/%YT%H:%M:%S')
+        participants = [p[0] for p in matches[i]['participants']]
+        scores = [p[1] for p in matches[i]['participants']]
+        if uname in participants:
+            print ' in: ' + str(participants)
+        else:
+            print 'out: ' + str(participants)
+
+        if uname in participants:
+            n += 1
+            p1n = ''
+            p1s = 0
+            p1e = 0
+            p2n = ''
+            p2s = 0
+            p2e = 0
+            if participants[0] == uname:
+                p1n = participants[0]
+                p1s = scores[0]
+                p1e = rank_history[i][p1n]
+                p2n = participants[1]
+                p2s = scores[1]
+                p2e = rank_history[i][p2n]
+            else:
+                p1n = participants[1]
+                p1s = scores[1]
+                p1e = rank_history[i][p1n]
+                p2n = participants[0]
+                p2s = scores[0]
+                p2e = rank_history[i][p2n]
+            urank.append({'date':datestr,
+                          'player1': get_display_name(p1n), 'player1score': p1s, 'player1elo': p1e,
+                          'player2': get_display_name(p2n), 'player2score': p2s, 'player2elo': p2e})
+    return json.dumps(urank)
+
+def old_stats(uname=''):
+    matches = get_matches()
+    rank_history = [r for r, n in get_elo_ranks(matches, history=True)]
+    rank_history = [{u:round(rank[u]) for u in get_all_users()}
+                    for rank in rank_history]
+
+    date = datetime.fromtimestamp(matches[0]['time']-1)
     datestr = date.strftime('%b %d')
     urank = [{'elo':rank_history[0][uname],
               'time':matches[0]['time']-1,
@@ -160,4 +219,4 @@ def new_match(match_b64):
     return json.dumps(dump)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
