@@ -596,7 +596,7 @@ timelineChart
 		dc.barChart(timelineChart).group(diffPlusGroup).ordinalColors(['green']).centerBar(true),
 		dc.barChart(timelineChart).group(diffMinusGroup).ordinalColors(['darkred']).centerBar(true),
 		dc.lineChart(timelineChart).group(zeroGroup).ordinalColors(['lightgray']),
-		dc.bubbleChart(timelineChart).group(diffGroup).valueAccessor(function(d) {return d.value.diff;}).colorAccessor(function(d) {console.log(d.value.diff);var val=1;d.value.diff<0?val=0:val=1;return val;}).ordinalColors(['darkred','green']).radiusValueAccessor(function(d) {return Math.sqrt(d.value.player2elo);}).minRadiusWithLabel(40).r(d3.scale.linear().domain([30, 150]))
+		dc.bubbleChart(timelineChart).group(diffGroup).valueAccessor(function(d) {return d.value.diff;}).colorAccessor(function(d) {console.log(d.value.diff);var val=1;d.value.diff<0?val=0:val=1;console.log(val);return val;}).colors(d3.scale.ordinal().domain(["0","1"]).range(["darkred","green"])).radiusValueAccessor(function(d) {return Math.sqrt(d.value.player2elo);}).minRadiusWithLabel(40).r(d3.scale.linear().domain([30, 150]))
 		])
 
 var winsLossesChart = dc.pieChart("#chart-winsLosses");
