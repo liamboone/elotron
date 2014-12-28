@@ -604,8 +604,9 @@ winsLossesChart
 	.width(150).height(150)
 	.dimension(winDim)
 	.group(winGroup)
-	.label(function(d) {if(all.value){return d.key + " " + Math.round(d.value / all.value()*100) + '%';}})
-	.ordinalColors(['darkred','green']);
+	.colorAccessor(function(d) {return d.value})
+	.colors(d3.scale.ordinal().domain(["Losses","Wins"]).range(["darkred","green"]))
+	.label(function(d) {if(all.value){return d.key + " " + Math.round(d.value / all.value()*100) + '%';}});
 
 var opponentsChart = dc.pieChart("#chart-opponents");
 opponentsChart
