@@ -492,6 +492,28 @@ function reduceRemoveAvg(attr) {
 function reduceInitAvg() {
   return {count:0, sum:0, avg:0};
 }
+
+/* custom functions for crossfilter reducing by point differential against elo ratings */
+function diffAdd() {
+  return function(p,v) {
+    p.diff = v.diff;
+    p.player1elo = v.player1elo;
+	p.player2elo = v.player2elo;
+    return p;
+  };
+}
+function diffRemove(attr) {
+  return function(p,v) {
+  	p.diff = v.diff;
+  	p.player1elo = 0;
+  	p.player2elo = 0;
+  	return p;
+  };
+}
+function diffInit() {
+  return {diff:0,player1elo:0, player2elo:0};
+}
+
 /*  END custom functions for reducing */
 
 var data = [
@@ -537,7 +559,7 @@ var oppGroup = oppDim.group();
 
 /*  *** Used for cumulative points scored against each elo rating */
 var elo2Dim = pong.dimension(function(d) {return d.player2elo;});
-var elo2group = elo2Dim.group().reduce(reduceAddAvg('player1score'),reduceRemoveAvg('player1score'),reduceInitAvg);
+var scoreAgainstElo2group = elo2Dim.group().reduce(reduceAddAvg('player1score'),reduceRemoveAvg('player1score'),reduceInitAvg);
 
 
 var winDim = pong.dimension(function(d) {return d.win;});
@@ -552,11 +574,10 @@ var pointsTakenGroup = oppDim.group().reduceSum(dc.pluck('player1score'));
 //currently unused
 var pointsGivenGroup = oppDim.group().reduceSum(dc.pluck('player2score'));
 
-var eloGroup = dateDim.group().reduceSum(dc.pluck('player1elo'));
 var cumulWinsGroup = dateDim.group().reduceSum(dc.pluck('player1score'));
 var cumulLossesGroup = dateDim.group().reduceSum(dc.pluck('player2score'));
 var ret=0;
-var diffGroup = dateDim.group().reduceSum(function(d) {return d.diff});
+var diffGroup = dateDim.group().reduce(diffAdd(),diffRemove(),diffInit);
 var diffPlusGroup = dateDim.group().reduceSum(function(d) {d.diff>0? ret = d.diff:ret=0; return ret});
 var diffMinusGroup = dateDim.group().reduceSum(function(d) {d.diff<0? ret = d.diff:ret=0; return ret});
 
@@ -575,7 +596,7 @@ timelineChart
 		dc.barChart(timelineChart).group(diffPlusGroup).ordinalColors(['green']).centerBar(true),
 		dc.barChart(timelineChart).group(diffMinusGroup).ordinalColors(['darkred']).centerBar(true),
 		dc.lineChart(timelineChart).group(zeroGroup).ordinalColors(['lightgray']),
-		dc.bubbleChart(timelineChart).group(diffGroup).colorAccessor(function(d) {var val=0;d.value<0?val=0:val=1;return val;}).ordinalColors(['green','darkred']).radiusValueAccessor(function(d) {return Math.abs(d.value)/4}).minRadiusWithLabel(40).r(d3.scale.linear().domain([5, 200]))
+		dc.bubbleChart(timelineChart).group(diffGroup).valueAccessor(function(d) {return d.value.diff;}).colorAccessor(function(d) {var val=0;d.value.diff<0?val=0:val=1;return val;}).ordinalColors(['green','darkred']).radiusValueAccessor(function(d) {return Math.sqrt(d.value.player2elo);}).minRadiusWithLabel(40).r(d3.scale.linear().domain([30, 150]))
 		])
 
 var winsLossesChart = dc.pieChart("#chart-winsLosses");
@@ -612,7 +633,7 @@ var pointsTaken2Chart = dc.scatterPlot("#chart-pointsTakenElo");
 pointsTaken2Chart
 	.width(350).height(200)
 	.dimension(elo2Dim)
-	.group(elo2group)
+	.group(scoreAgainstElo2group)
 	.keyAccessor(function(d) {return d.key})
 	.valueAccessor(function (d){var tempAvg=0; d.value.avg? tempAvg=d.value.avg: tempAvg=0; return tempAvg})
 	.x(d3.scale.linear().domain([600,1400]))
