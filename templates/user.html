@@ -1,48 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}{{ users[uname] }} {% if uname != '' %} - {% endif %}{% endblock %}
+{% block title %}
+    {{ users[uname] }} {% if uname != '' %} - {% endif %}
+{% endblock %}
 
 {% block user_menu %}
-{% for user in users|dictsort(false, 'value') %}
-<li><a href='/{{user[0]}}'>{{user[1]}}</a></li>
-{% endfor %}
+    {% for user in users|dictsort(false, 'value') %}
+    <li><a href='/{{user[0]}}'>{{user[1]}}</a></li>
+    {% endfor %}
 {% endblock %}
 
 {% block user_content %}
-{% set new_player_found = [] %}
-{{super()}}
-<h3>Leaderboard</h3>
-<div class="list-group">
-    {% for rank, user, num_games in leaderboard %}
-    <a href="/{{user}}"
-        class="list-group-item {% if user == uname %}active{% endif %}">
-        <span class="badge">{{ rank|round|int }}</span>
-        {{ users[user] }}
-        {% if num_games < new_player_period %}
-        {% if new_player_found.append(1) %}{% endif %}
-        {# jinja scoping is odd. The above gets around some rules #}
-        {# so we can detect if there are any new players and #}
-        {# display the footnote #}
-            *
-        {% endif %}
-    </a>
-    {% endfor %}
-</div>
-{% if uname != "" and ranks[uname] < leaderboard[-1][0] %}
-<div style="text-align:center;"><h4>⋮</h4></div><br />
-<div class="list-group">
-    <a href="/{{uname}}"
-        class="list-group-item active">
-        <span class="badge">{{ ranks[uname]|round|int }}</span>
-        {{ users[uname] }}
-    </a>
-</div>
-{% endif %}
-{% if new_player_found %}
-<p><small>
-* Played less than {{new_player_period}} games.
-</small></p>
-{% endif %}
+    {% set new_player_found = [] %}
+    {{super()}}
+    <h3>Leaderboard</h3>
+    <div class="list-group">
+        {% for rank, user, num_games in leaderboard %}
+        <a href="/{{user}}"
+            class="list-group-item {% if user == uname %}active{% endif %}">
+            <span class="badge">{{ rank|round|int }}</span>
+            {{ users[user] }}
+            {% if num_games < new_player_period %}
+            {% if new_player_found.append(1) %}{% endif %}
+            {# jinja scoping is odd. The above gets around some rules #}
+            {# so we can detect if there are any new players and #}
+            {# display the footnote #}
+                *
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% if uname != "" and ranks[uname] < leaderboard[-1][0] %}
+    <div style="text-align:center;"><h4>⋮</h4></div><br />
+    <div class="list-group">
+        <a href="/{{uname}}"
+            class="list-group-item active">
+            <span class="badge">{{ ranks[uname]|round|int }}</span>
+            {{ users[uname] }}
+        </a>
+    </div>
+    {% endif %}
+    {% if new_player_found %}
+    <p><small>
+    * Played less than {{new_player_period}} games.
+    </small></p>
+    {% endif %}
 {% endblock %}
 
 {% block match_content %}
@@ -93,593 +95,361 @@
 {% endblock %}
 
 {% block add_match %}
-<script>
-var postMatch = function ()
-{
-    var match_str = document.getElementById("player1").value + ";" +
-                    document.getElementById("score1").value + ";" +
-                    document.getElementById("player2").value + ";" +
-                    document.getElementById("score2").value;
-    var match_b64 = btoa(match_str).replace('/','_').replace('+','.');
-    {% if admin %}
-    match_b64 += "?month=" + document.getElementById("month").value + 
-                 "&day="   + document.getElementById("day").value
-    {% endif %}
-    d3.json("/add_match/"+match_b64, function(error, data) {
-                if (error) return console.warn(error);
-                loopback = data;
-                console.log(data);
-                if (data.error.length == 0)
-                {
-                    document.getElementById("score1").value = "";
-                    document.getElementById("score2").value = "";
-                    window.location.reload();
-                }
-                else
-                {
-                    document.querySelector("#player1-form-group")
-                        .classList.remove("has-error");
-                    document.querySelector("#player2-form-group")
-                        .classList.remove("has-error");
-                    document.querySelector("#score1-form-group")
-                        .classList.remove("has-error");
-                    document.querySelector("#score2-form-group")
-                        .classList.remove("has-error");
-
-                    var previous_msgs = document
-                        .getElementsByClassName("alert");
-                    while(previous_msgs[0])
+    <script>
+    var postMatch = function ()
+    {
+        var match_str = document.getElementById("player1").value + ";" +
+                        document.getElementById("score1").value + ";" +
+                        document.getElementById("player2").value + ";" +
+                        document.getElementById("score2").value;
+        var match_b64 = btoa(match_str).replace('/','_').replace('+','.');
+        {% if admin %}
+        match_b64 += "?month=" + document.getElementById("month").value + 
+                     "&day="   + document.getElementById("day").value
+        {% endif %}
+        d3.json("/add_match/"+match_b64, function(error, data) {
+                    if (error) return console.warn(error);
+                    loopback = data;
+                    console.log(data);
+                    if (data.error.length == 0)
                     {
-                        previous_msgs[0].parentElement.removeChild(previous_msgs[0])
+                        document.getElementById("score1").value = "";
+                        document.getElementById("score2").value = "";
+                        window.location.reload();
                     }
-
-                    var inputs = document.getElementById("match_inputs");
-
-                    for (var i = 0; i < data.error.length; ++i)
+                    else
                     {
-                        err = data.error[i];
-                        for (var j = 0; j < err[0].length; ++j)
+                        document.querySelector("#player1-form-group")
+                            .classList.remove("has-error");
+                        document.querySelector("#player2-form-group")
+                            .classList.remove("has-error");
+                        document.querySelector("#score1-form-group")
+                            .classList.remove("has-error");
+                        document.querySelector("#score2-form-group")
+                            .classList.remove("has-error");
+
+                        var previous_msgs = document
+                            .getElementsByClassName("alert");
+                        while(previous_msgs[0])
                         {
-                            document
-                                .querySelector("#"+err[0][j]+"-form-group")
-                                .classList.add("has-error");
+                            previous_msgs[0].parentElement.removeChild(previous_msgs[0])
                         }
-                        var err_msg = document.createElement("div");
-                        err_msg.classList.add("alert");
-                        err_msg.classList.add("alert-danger");
-                        err_msg.classList.add("alert-dismissable");
-                        err_msg.innerHTML = "<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><span aria-hidden=\"true\">&times;</span><span class=\"sr-only\">Close</span></button><strong>Error:</strong> "+err[1];
-                        inputs.appendChild(err_msg);
+
+                        var inputs = document.getElementById("match_inputs");
+
+                        for (var i = 0; i < data.error.length; ++i)
+                        {
+                            err = data.error[i];
+                            for (var j = 0; j < err[0].length; ++j)
+                            {
+                                document
+                                    .querySelector("#"+err[0][j]+"-form-group")
+                                    .classList.add("has-error");
+                            }
+                            var err_msg = document.createElement("div");
+                            err_msg.classList.add("alert");
+                            err_msg.classList.add("alert-danger");
+                            err_msg.classList.add("alert-dismissable");
+                            err_msg.innerHTML = "<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><span aria-hidden=\"true\">&times;</span><span class=\"sr-only\">Close</span></button><strong>Error:</strong> "+err[1];
+                            inputs.appendChild(err_msg);
+                        }
                     }
-                }
-            });
-};
-</script>
-<form id="add_match" class="form-inline" role="form">
-    <div id="match_inputs">
-        {% for player in [1,2] %}
-        <div id="player{{player}}-form-group" class="form-group">
-            <select id="player{{player}}" class="form-control form-control-danger">
-                {% for user in users|dictsort(false, 'value') %}
-                <option 
-                {% if player == 1 and uname == user[0] %}selected="selected"{% endif %}
-                value="{{user[0]}}">
-                {{user[1]}}
-                </option>
-                {% endfor %}
-            </select>
+                });
+    };
+    </script>
+    <form id="add_match" class="form-inline" role="form">
+        <div id="match_inputs">
+            {% for player in [1,2] %}
+            <div id="player{{player}}-form-group" class="form-group">
+                <select id="player{{player}}" class="form-control form-control-danger">
+                    {% for user in users|dictsort(false, 'value') %}
+                    <option 
+                        {% if player == 1 and uname == user[0] %}
+                            selected="selected"
+                        {% endif %}
+                            value="{{user[0]}}">
+                        {{user[1]}}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="score{{player}}-form-group" class="form-group has-feedback">
+                <input id="score{{player}}" class="form-control" placeholder="score">
+            </div>
+            <br />
+            <br />
+            {% endfor %}
         </div>
-        <div id="score{{player}}-form-group" class="form-group has-feedback">
-            <input id="score{{player}}" class="form-control" placeholder="score">
+        {% if admin %}
+        <div id="month-day-form-group" class="form-group">
+            <input id="month" class="form-control" placeholder="month">
+            <input id="day" class="form-control" placeholder="day">
         </div>
-        <br />
-        <br />
-        {% endfor %}
-    </div>
-    {% if admin %}
-    <div id="month-day-form-group" class="form-group">
-        <input id="month" class="form-control" placeholder="month">
-        <input id="day" class="form-control" placeholder="day">
-    </div>
-    {% endif %}
-    <input onclick="postMatch();" type="button" 
-        class="btn btn-primary" value="Add Match">
-</form>
+        {% endif %}
+        <input onclick="postMatch();" type="button" 
+            class="btn btn-primary" value="Add Match">
+    </form>
 {% endblock %}
 
 {% block stats_content %}
-<style>
+{% if uname != '' %}
+    <div id="chart-timeline" style=""></div>
+    <div id="chart-opponents" style="float:right"><div style="position:absolute;top:315px;padding-left:75px;text-align:center">Number of Games<br/>Against Each Opponent</div></div>
 
-.chart text {
-    fill: black;
-    font: 14px sans-serif;
-    text-anchor: middle;
-}
+    <div id="chart-pointsTaken" style="margin: 30px 5px 10px 10px"></div>
+    <div id="chart-winsLosses" style="margin: 30px 15px 10px 0px"></div>
+    <div id="chart-pointsTakenElo" style="margin: 30px 0px 10px 30px"></div>
 
-path {
-    stroke: steelblue;
-    stroke-width: 2;
-    fill: none;
-}
- 
-line {
-    stroke: black;
-}
-
-text {
-    font-family: Arial;
-    font-size: 9pt;
-}
-</style>
-<div class="chart"></div>
-<script>
-var margin = {top: 30, 
-              right: 100,
-              bottom: 30,
-              left: 50};
-var width = 600 - margin.left - margin.right;
-var height = 400 - margin.bottom - margin.top;
-
-var bisectNum = d3.bisector(function(d) { return d.num; }).left;
-
-var x = d3.scale.linear()
-    .range([0, width])
-var y = d3.scale.linear()
-    .range([height, 0]);
-
-var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(0)
-    .tickFormat(function(d, i) { return ""; });
-
-var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(5);
-
-var valueline = d3.svg.line()
-    .x(function(d) { return x(d.num); })
-    .y(function(d) { return y(d.elo); });
-
-var svg = d3.select(".chart")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
-
-var lineSvg = svg.append("g");
-
-var focus = svg.append("g")
-    .style("display", "none");
-
-var make_best_chart = function(error, data)
-{
-    console.log(data);
-
-    x.domain(d3.extent(data, function(d) { return d.num; }));
-    y.domain([d3.min(data, function(d) { return d.elo; })-10, 
-              d3.max(data, function(d) { return d.elo; })+10]);
-    
-    lineSvg.append("path")
-        .attr("class", "line")
-        .attr("d", valueline(data));
-
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-
-    focus.append("line")
-        .attr("class", "x")
-        .style("stroke", "blue")
-        .style("stroke-dasharray", "3,3")
-        .style("opacity", 0.5)
-        .attr("y1", 0)
-        .attr("y2", height);
-
-    focus.append("circle")
-        .attr("class", "y")
-        .style("fill", "none")
-        .style("stroke", "blue")
-        .attr("r", 4);
-
-    focus.append("text")
-        .attr("class", "y1")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "-.3em");
-
-    focus.append("text")
-        .attr("class", "y2")
-        .attr("dx", 8)
-        .attr("dy", "-.3em");
-
-    focus.append("text")
-        .attr("class", "y3")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-    focus.append("text")
-        .attr("class", "y4")
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-    focus.append("text")
-        .attr("class", "y5")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "2em");
-
-    focus.append("text")
-        .attr("class", "y6")
-        .attr("dx", 8)
-        .attr("dy", "2em");
-
-    focus.append("text")
-        .attr("class", "y7")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "3em");
-
-    focus.append("text")
-        .attr("class", "y8")
-        .attr("dx", 8)
-        .attr("dy", "3em");
-
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .style("fill", "none")
-        .style("pointer-events", "all")
-        .on("mouseover", function() { focus.style("display", null); })
-        .on("mouseout", function() { focus.style("display", "none"); })
-        .on("mousemove", mousemove);
-
-    function mousemove() {
-        var x0 = x.invert(d3.mouse(this)[0]),
-            i = bisectNum(data, x0, 1),
-            d0 = data[i - 1],
-            d1 = data[i],
-            d = x0 - d0.num > d1.num - x0 ? d1 : d0;
-
-        focus.select("circle.y")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")");
-
-        focus.select("text.y1")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .text(d3.round(d.elo));
-
-        focus.select("text.y2")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .text(d3.round(d.elo));
-
-        focus.select("text.y3")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .text(d.date);
-
-        focus.select("text.y4")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .text(d.date);
-
-        focus.select("text.y5")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .html(d.match[1]);
-
-        focus.select("text.y6")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .html(d.match[1]);
-
-        focus.select("text.y7")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .html(d.match[0]);
-
-        focus.select("text.y8")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .html(d.match[0]);
-
-        focus.select(".x")
-            .attr("transform",
-                  "translate(" + x(d.num) + "," +
-                                 y(d.elo) + ")")
-            .attr("y2", height - y(d.elo));
-    }
-};
-
-(function() 
-{
-    d3.json("/{{uname}}/stats", make_best_chart);
-})();
-</script>
-{% endblock %}
-
-{% block mikestats %}
-<div id="chart-timeline" style=""></div>
-<div id="chart-opponents" style="float:right"><div style="position:absolute;top:315px;padding-left:75px;text-align:center">Number of Games<br/>Against Each Opponent</div></div>
-
-<div id="chart-pointsTaken" style="margin: 30px 5px 10px 10px"></div>
-<div id="chart-winsLosses" style="margin: 30px 15px 10px 0px"></div>
-<div id="chart-pointsTakenElo" style="margin: 30px 0px 10px 30px"></div>
-
-<div style="clear:both;padding:50px">
-	<table id="dc-data-table">
-		<thead>
-			<tr class="header">
-				<th>Day</th>
-				<th>Your rating</th>
-				<th>Your score</th>
-				<th>Opponent's score</th>
-				<th>Opponent's rating</th>
-			</tr>
-		</thead>
-	</table>
-</div>
-<script>
-/*  FIX for brush filtering on composite chart, from: https://groups.google.com/forum/#!topic/dc-js-user-group/yI6_cbvgfbU  */
-(function() {
-    var compositeChart = dc.compositeChart;
-    dc.compositeChart = function(parent, chartGroup) {
-        var _chart = compositeChart(parent, chartGroup);
-        
-        _chart._brushing = function () {
-            var extent = _chart.extendBrush();
-            var rangedFilter = null;
-            if(!_chart.brushIsEmpty(extent)) {
-                rangedFilter = dc.filters.RangedFilter(extent[0], extent[1]);
-            }
-
-            dc.events.trigger(function () {
-                if (!rangedFilter) {
-                    _chart.filter(null);
-                } else {
-                    _chart.replaceFilter(rangedFilter);
+    <div style="clear:both;padding:50px">
+        <table id="dc-data-table">
+            <thead>
+                <tr class="header">
+                    <th>Day</th>
+                    <th>Your rating</th>
+                    <th>Your score</th>
+                    <th>Opponent's score</th>
+                    <th>Opponent's rating</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <script>
+    /*  FIX for brush filtering on composite chart, from: https://groups.google.com/forum/#!topic/dc-js-user-group/yI6_cbvgfbU  */
+    (function() {
+        var compositeChart = dc.compositeChart;
+        dc.compositeChart = function(parent, chartGroup) {
+            var _chart = compositeChart(parent, chartGroup);
+            
+            _chart._brushing = function () {
+                var extent = _chart.extendBrush();
+                var rangedFilter = null;
+                if(!_chart.brushIsEmpty(extent)) {
+                    rangedFilter = dc.filters.RangedFilter(extent[0], extent[1]);
                 }
-                _chart.redrawGroup();
-            }, dc.constants.EVENT_DELAY);
+
+                dc.events.trigger(function () {
+                    if (!rangedFilter) {
+                        _chart.filter(null);
+                    } else {
+                        _chart.replaceFilter(rangedFilter);
+                    }
+                    _chart.redrawGroup();
+                }, dc.constants.EVENT_DELAY);
+            };
+            
+            return _chart;
         };
-        
-        return _chart;
+    })();
+    /*  END fix for brush filtering composite charts */
+
+    /* custom functions for crossfilter reducing by average */
+    function reduceAddAvg(attr) {
+      return function(p,v) {
+        ++p.count
+        p.sum += v[attr];
+        p.avg = p.sum/p.count;
+        return p;
+      };
+    }
+    function reduceRemoveAvg(attr) {
+      return function(p,v) {
+        --p.count
+        p.sum -= v[attr];
+        p.avg = p.sum/p.count;
+        return p;
+      };
+    }
+    function reduceInitAvg() {
+      return {count:0, sum:0, avg:0};
+    }
+
+    /* custom functions for crossfilter reducing by point differential against elo ratings */
+    function diffAdd() {
+      return function(p,v) {
+        p.diff = v.diff;
+        p.player1elo = v.player1elo;
+        p.player2elo = v.player2elo;
+        return p;
+      };
+    }
+    function diffRemove(attr) {
+      return function(p,v) {
+        p.diff = v.diff;
+        p.player1elo = 0;
+        p.player2elo = 0;
+        return p;
+      };
+    }
+    function diffInit() {
+      return {diff:0,player1elo:0, player2elo:0};
+    }
+
+    /*  END custom functions for reducing */
+
+    var data = [
+        {date: "12/25/2012T12:00:00", player1: "Mike", player2: "Kyle", player1elo: 1200, player2elo: 950, player1score: 21, player2score: 19},
+        {date: "12/25/2012T12:00:10", player1: "Mike", player2: "Pavan", player1elo: 1050, player2elo: 800, player1score: 21, player2score: 17},
+        {date: "12/25/2012T12:00:20", player1: "Mike", player2: "Liam", player1elo: 1111, player2elo: 950, player1score: 18, player2score: 21},
+        {date: "12/28/2012T05:00:10", player1: "Mike", player2: "Kirk", player1elo: 1100, player2elo: 1050, player1score: 21, player2score: 23},
+        {date: "12/29/2012T06:00:10", player1: "Mike", player2: "Liam", player1elo: 950, player2elo: 1100, player1score: 21, player2score: 17},
+        {date: "12/30/2012T12:00:10", player1: "Mike", player2: "John", player1elo: 900, player2elo: 950, player1score: 3, player2score: 21},
+        {date: "12/31/2012T12:00:10", player1: "Mike", player2: "Liam", player1elo: 850, player2elo: 1000, player1score: 21, player2score: 17},
+        {date: "1/5/2013T12:00:10", player1: "Mike", player2: "Kyle", player1elo: 975, player2elo: 950, player1score: 14, player2score: 21},
+        {date: "1/7/2013T12:00:10", player1: "Mike", player2: "Liam", player1elo: 1175, player2elo: 750, player1score: 21, player2score: 13},
+        {date: "1/8/2013T03:00:10", player1: "Mike", player2: "Kyle", player1elo: 1055, player2elo: 800, player1score: 15, player2score: 21},
+        {date: "1/9/2013T07:00:10", player1: "Mike", player2: "John", player1elo: 850, player2elo: 950, player1score: 2, player2score: 21},
+        {date: "1/10/2013T04:00:10", player1: "Mike", player2: "Kyle", player1elo: 1050, player2elo: 950, player1score: 21, player2score: 17},
+    ];
+    var mike_best_chart = function(error, data)
+    {
+    var pong = crossfilter(data);
+    var all = pong.groupAll();
+    var parseDate = d3.time.format("%m/%d/%YT%H:%M:%S").parse;
+    var cumulWins = 0;
+    var cumulLosses = 0;
+    data.forEach(function(d) {
+        d.date = parseDate(d.date);
+        d.diff = d.player1score - d.player2score;
+        if (d.player1score > d.player2score) {
+            d.win = "Wins";
+            cumulWins += 1;
+        } else {
+            d.win = "Losses";
+            cumulLosses = cumulLosses - 1;
+        }
+        d.cumulWin = cumulWins;
+        d.cumulLoss = cumulLosses;
+
+    })
+
+    var dateDim = pong.dimension(function(d) {return d.date;});
+    var zeroGroup = dateDim.group().reduceSum(function(d) {return 0;});
+    var oppDim = pong.dimension(function(d) {return d.player2;});
+    var oppGroup = oppDim.group();
+
+    /*  *** Used for cumulative points scored against each elo rating */
+    var elo2Dim = pong.dimension(function(d) {return d.player2elo;});
+    var scoreAgainstElo2group = elo2Dim.group().reduce(reduceAddAvg('player1score'),reduceRemoveAvg('player1score'),reduceInitAvg);
+
+
+    var winDim = pong.dimension(function(d) {return d.win;});
+    var winGroup = winDim.group();
+
+    var pointsDim = pong.dimension(function(d) {return d.player1score;});
+    var pointsGroup = pointsDim.group();
+
+    //currently unused
+    var pointsTakenGroup = oppDim.group().reduceSum(dc.pluck('player1score'));
+
+    //currently unused
+    var pointsGivenGroup = oppDim.group().reduceSum(dc.pluck('player2score'));
+
+    var cumulWinsGroup = dateDim.group().reduceSum(dc.pluck('player1score'));
+    var cumulLossesGroup = dateDim.group().reduceSum(dc.pluck('player2score'));
+    var ret=0;
+    var diffGroup = dateDim.group().reduce(diffAdd(),diffRemove(),diffInit);
+    var diffPlusGroup = dateDim.group().reduceSum(function(d) {d.diff>0? ret = d.diff:ret=0; return ret});
+    var diffMinusGroup = dateDim.group().reduceSum(function(d) {d.diff<0? ret = d.diff:ret=0; return ret});
+
+    //offset necessary for the timeline graph to show all games, even at the beginning/end
+    var minDate = d3.time.day.offset(dateDim.bottom(1)[0].date, -1);
+    var maxDate = d3.time.day.offset(dateDim.top(1)[0].date, 1);
+
+    var timelineChart = dc.compositeChart("#chart-timeline");
+    timelineChart
+        .width(900).height(200)
+        .dimension(dateDim)
+        .y(d3.scale.linear().domain([-21,21]))
+        .yAxisLabel('End-game Point Differential')
+        .x(d3.time.scale().domain([minDate,maxDate]))
+        .compose([
+            dc.barChart(timelineChart).group(diffPlusGroup).ordinalColors(['green']).centerBar(true),
+            dc.barChart(timelineChart).group(diffMinusGroup).ordinalColors(['darkred']).centerBar(true),
+            dc.lineChart(timelineChart).group(zeroGroup).ordinalColors(['lightgray']),
+            dc.bubbleChart(timelineChart).group(diffGroup).valueAccessor(function(d) {return d.value.diff;}).colorAccessor(function(d) {var val=1;d.value.diff<0?val=0:val=1;return val;}).colors(d3.scale.ordinal().domain(["0","1"]).range(["darkred","green"])).radiusValueAccessor(function(d) {return Math.sqrt(d.value.player2elo);}).minRadiusWithLabel(40).r(d3.scale.linear().domain([30, 150]))
+            ])
+
+    var winsLossesChart = dc.pieChart("#chart-winsLosses");
+    winsLossesChart
+        .width(150).height(150)
+        .dimension(winDim)
+        .group(winGroup)
+        .colorAccessor(function(d) {return d.key})
+        .colors(d3.scale.ordinal().domain(["Losses","Wins"]).range(["darkred","green"]))
+        .label(function(d) {if(all.value){return d.key + " " + Math.round(d.value / all.value()*100) + '%';}});
+
+    var opponentsChart = dc.pieChart("#chart-opponents");
+    opponentsChart
+        .width(300).height(300)
+        .dimension(oppDim)
+        .group(oppGroup)
+        .label(function(d) {if(all.value){return d.key + " (" + d.value + ")"}})
+        .innerRadius(30);
+
+    /* *** for number of games in which each amount of points was achieved ***/
+    var pointsTakenChart = dc.barChart("#chart-pointsTaken");
+    pointsTakenChart
+        .width(350).height(200)
+        .dimension(pointsDim)
+        .group(pointsGroup)
+        .x(d3.scale.linear().domain([0,pointsDim.top(1)[0].player1score+2]))
+        .centerBar(true)
+        .xAxisLabel("My Points Scored in Game")
+        .yAxisLabel("Number of Games")
+        ;
+
+
+    /* ***  for cumulative points scored against each elo rating ***/
+    var pointsTaken2Chart = dc.scatterPlot("#chart-pointsTakenElo");
+    pointsTaken2Chart
+        .width(350).height(200)
+        .dimension(elo2Dim)
+        .group(scoreAgainstElo2group)
+        .keyAccessor(function(d) {return d.key})
+        .valueAccessor(function (d){var tempAvg=0; d.value.avg? tempAvg=d.value.avg: tempAvg=0; return tempAvg})
+        .x(d3.scale.linear().domain([600,1400]))
+        .y(d3.scale.linear().domain([5,22]))
+        .xAxisLabel("Opponent's ELO Rating")
+        .yAxisLabel("My Avg Points Scored")
+        .symbolSize('5')
+        .highlightedSize('7')
+        ;
+
+    var datatable = dc.dataTable("#dc-data-table");
+    datatable
+        .dimension(dateDim)
+        .group(function (d) {return d.player2})
+        .columns([
+            function(d) {return d.date;},
+            function(d) {return d.player1elo;},
+            function(d) {return d.player1score;},
+            function(d) {return d.player2score;},
+            function(d) {return d.player2elo;}
+            ])
+        .renderlet(function (table) {
+            $("#dc-data-table tr").each(function (index, Element) {
+                if ($(Element).children("td").length>1) {
+                    var yourScore = parseInt($(Element).children("td")[2].innerHTML);		
+                    var oppScore = parseInt($(Element).children("td")[3].innerHTML);
+                    $(Element).css("text-align","center");
+                    if (yourScore > oppScore) {
+                        $(Element).css("background-color", "lightgreen");
+                    } else {
+                        $(Element).css("background-color", "pink");
+                    }
+                }
+            })
+        });
+
+    dc.renderAll();
     };
-})();
-/*  END fix for brush filtering composite charts */
 
-/* custom functions for crossfilter reducing by average */
-function reduceAddAvg(attr) {
-  return function(p,v) {
-    ++p.count
-    p.sum += v[attr];
-    p.avg = p.sum/p.count;
-    return p;
-  };
-}
-function reduceRemoveAvg(attr) {
-  return function(p,v) {
-    --p.count
-    p.sum -= v[attr];
-    p.avg = p.sum/p.count;
-    return p;
-  };
-}
-function reduceInitAvg() {
-  return {count:0, sum:0, avg:0};
-}
-
-/* custom functions for crossfilter reducing by point differential against elo ratings */
-function diffAdd() {
-  return function(p,v) {
-    p.diff = v.diff;
-    p.player1elo = v.player1elo;
-	p.player2elo = v.player2elo;
-    return p;
-  };
-}
-function diffRemove(attr) {
-  return function(p,v) {
-  	p.diff = v.diff;
-  	p.player1elo = 0;
-  	p.player2elo = 0;
-  	return p;
-  };
-}
-function diffInit() {
-  return {diff:0,player1elo:0, player2elo:0};
-}
-
-/*  END custom functions for reducing */
-
-var data = [
-	{date: "12/25/2012T12:00:00", player1: "Mike", player2: "Kyle", player1elo: 1200, player2elo: 950, player1score: 21, player2score: 19},
-	{date: "12/25/2012T12:00:10", player1: "Mike", player2: "Pavan", player1elo: 1050, player2elo: 800, player1score: 21, player2score: 17},
-	{date: "12/25/2012T12:00:20", player1: "Mike", player2: "Liam", player1elo: 1111, player2elo: 950, player1score: 18, player2score: 21},
-	{date: "12/28/2012T05:00:10", player1: "Mike", player2: "Kirk", player1elo: 1100, player2elo: 1050, player1score: 21, player2score: 23},
-	{date: "12/29/2012T06:00:10", player1: "Mike", player2: "Liam", player1elo: 950, player2elo: 1100, player1score: 21, player2score: 17},
-	{date: "12/30/2012T12:00:10", player1: "Mike", player2: "John", player1elo: 900, player2elo: 950, player1score: 3, player2score: 21},
-	{date: "12/31/2012T12:00:10", player1: "Mike", player2: "Liam", player1elo: 850, player2elo: 1000, player1score: 21, player2score: 17},
-	{date: "1/5/2013T12:00:10", player1: "Mike", player2: "Kyle", player1elo: 975, player2elo: 950, player1score: 14, player2score: 21},
-	{date: "1/7/2013T12:00:10", player1: "Mike", player2: "Liam", player1elo: 1175, player2elo: 750, player1score: 21, player2score: 13},
-	{date: "1/8/2013T03:00:10", player1: "Mike", player2: "Kyle", player1elo: 1055, player2elo: 800, player1score: 15, player2score: 21},
-	{date: "1/9/2013T07:00:10", player1: "Mike", player2: "John", player1elo: 850, player2elo: 950, player1score: 2, player2score: 21},
-	{date: "1/10/2013T04:00:10", player1: "Mike", player2: "Kyle", player1elo: 1050, player2elo: 950, player1score: 21, player2score: 17},
-];
-var mike_best_chart = function(error, data)
-{
-var pong = crossfilter(data);
-var all = pong.groupAll();
-var parseDate = d3.time.format("%m/%d/%YT%H:%M:%S").parse;
-var cumulWins = 0;
-var cumulLosses = 0;
-data.forEach(function(d) {
-	d.date = parseDate(d.date);
-	d.diff = d.player1score - d.player2score;
-	if (d.player1score > d.player2score) {
-		d.win = "Wins";
-		cumulWins += 1;
-	} else {
-		d.win = "Losses";
-		cumulLosses = cumulLosses - 1;
-	}
-	d.cumulWin = cumulWins;
-	d.cumulLoss = cumulLosses;
-
-})
-
-var dateDim = pong.dimension(function(d) {return d.date;});
-var zeroGroup = dateDim.group().reduceSum(function(d) {return 0;});
-var oppDim = pong.dimension(function(d) {return d.player2;});
-var oppGroup = oppDim.group();
-
-/*  *** Used for cumulative points scored against each elo rating */
-var elo2Dim = pong.dimension(function(d) {return d.player2elo;});
-var scoreAgainstElo2group = elo2Dim.group().reduce(reduceAddAvg('player1score'),reduceRemoveAvg('player1score'),reduceInitAvg);
-
-
-var winDim = pong.dimension(function(d) {return d.win;});
-var winGroup = winDim.group();
-
-var pointsDim = pong.dimension(function(d) {return d.player1score;});
-var pointsGroup = pointsDim.group();
-
-//currently unused
-var pointsTakenGroup = oppDim.group().reduceSum(dc.pluck('player1score'));
-
-//currently unused
-var pointsGivenGroup = oppDim.group().reduceSum(dc.pluck('player2score'));
-
-var cumulWinsGroup = dateDim.group().reduceSum(dc.pluck('player1score'));
-var cumulLossesGroup = dateDim.group().reduceSum(dc.pluck('player2score'));
-var ret=0;
-var diffGroup = dateDim.group().reduce(diffAdd(),diffRemove(),diffInit);
-var diffPlusGroup = dateDim.group().reduceSum(function(d) {d.diff>0? ret = d.diff:ret=0; return ret});
-var diffMinusGroup = dateDim.group().reduceSum(function(d) {d.diff<0? ret = d.diff:ret=0; return ret});
-
-//offset necessary for the timeline graph to show all games, even at the beginning/end
-var minDate = d3.time.day.offset(dateDim.bottom(1)[0].date, -1);
-var maxDate = d3.time.day.offset(dateDim.top(1)[0].date, 1);
-
-var timelineChart = dc.compositeChart("#chart-timeline");
-timelineChart
-	.width(900).height(200)
-	.dimension(dateDim)
-	.y(d3.scale.linear().domain([-21,21]))
-	.yAxisLabel('End-game Point Differential')
-	.x(d3.time.scale().domain([minDate,maxDate]))
-	.compose([
-		dc.barChart(timelineChart).group(diffPlusGroup).ordinalColors(['green']).centerBar(true),
-		dc.barChart(timelineChart).group(diffMinusGroup).ordinalColors(['darkred']).centerBar(true),
-		dc.lineChart(timelineChart).group(zeroGroup).ordinalColors(['lightgray']),
-		dc.bubbleChart(timelineChart).group(diffGroup).valueAccessor(function(d) {return d.value.diff;}).colorAccessor(function(d) {var val=1;d.value.diff<0?val=0:val=1;return val;}).colors(d3.scale.ordinal().domain(["0","1"]).range(["darkred","green"])).radiusValueAccessor(function(d) {return Math.sqrt(d.value.player2elo);}).minRadiusWithLabel(40).r(d3.scale.linear().domain([30, 150]))
-		])
-
-var winsLossesChart = dc.pieChart("#chart-winsLosses");
-winsLossesChart
-	.width(150).height(150)
-	.dimension(winDim)
-	.group(winGroup)
-	.colorAccessor(function(d) {return d.key})
-	.colors(d3.scale.ordinal().domain(["Losses","Wins"]).range(["darkred","green"]))
-	.label(function(d) {if(all.value){return d.key + " " + Math.round(d.value / all.value()*100) + '%';}});
-
-var opponentsChart = dc.pieChart("#chart-opponents");
-opponentsChart
-	.width(300).height(300)
-	.dimension(oppDim)
-	.group(oppGroup)
-	.label(function(d) {if(all.value){return d.key + " (" + d.value + ")"}})
-	.innerRadius(30);
-
-/* *** for number of games in which each amount of points was achieved ***/
-var pointsTakenChart = dc.barChart("#chart-pointsTaken");
-pointsTakenChart
-	.width(350).height(200)
-	.dimension(pointsDim)
-	.group(pointsGroup)
-	.x(d3.scale.linear().domain([0,pointsDim.top(1)[0].player1score+2]))
-	.centerBar(true)
-	.xAxisLabel("My Points Scored in Game")
-	.yAxisLabel("Number of Games")
-	;
-
-
-/* ***  for cumulative points scored against each elo rating ***/
-var pointsTaken2Chart = dc.scatterPlot("#chart-pointsTakenElo");
-pointsTaken2Chart
-	.width(350).height(200)
-	.dimension(elo2Dim)
-	.group(scoreAgainstElo2group)
-	.keyAccessor(function(d) {return d.key})
-	.valueAccessor(function (d){var tempAvg=0; d.value.avg? tempAvg=d.value.avg: tempAvg=0; return tempAvg})
-	.x(d3.scale.linear().domain([600,1400]))
-	.y(d3.scale.linear().domain([5,22]))
-	.xAxisLabel("Opponent's ELO Rating")
-	.yAxisLabel("My Avg Points Scored")
-	.symbolSize('5')
-	.highlightedSize('7')
-	;
-
-var datatable = dc.dataTable("#dc-data-table");
-datatable
-	.dimension(dateDim)
-	.group(function (d) {return d.player2})
-	.columns([
-		function(d) {return d.date;},
-		function(d) {return d.player1elo;},
-		function(d) {return d.player1score;},
-		function(d) {return d.player2score;},
-		function(d) {return d.player2elo;}
-		])
-	.renderlet(function (table) {
-		$("#dc-data-table tr").each(function (index, Element) {
-			if ($(Element).children("td").length>1) {
-				var yourScore = parseInt($(Element).children("td")[2].innerHTML);		
-				var oppScore = parseInt($(Element).children("td")[3].innerHTML);
-				$(Element).css("text-align","center");
-				if (yourScore > oppScore) {
-					$(Element).css("background-color", "lightgreen");
-				} else {
-					$(Element).css("background-color", "pink");
-				}
-			}
-		})
-	});
-
-dc.renderAll();
-};
-
-(function() 
-{
-    d3.json("/{{uname}}/stats", mike_best_chart);
-})();
-</script>
-
-
-
+    (function() 
+    {
+        d3.json("/{{uname}}/stats", mike_best_chart);
+    })();
+    </script>
+{% else %}
+<p>Main page stats coming soon.</p>
+{% endif %}
 {% endblock %}
