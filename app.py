@@ -44,10 +44,10 @@ def user(uname=''):
 
     matches = []
     differential = []
-    rank_history, games_played = zip(*get_elo_ranks(get_matches(), True))
+    #rank_history, games_played = zip(*get_elo_ranks(get_matches(), True))
 
-    rank_history = [{u:round(rank[u]) for u in get_all_users()}
-                    for rank in rank_history]
+    #rank_history = [{u:round(rank[u]) for u in get_all_users()}
+    #                for rank in rank_history]
 
     new_player_period = get_config('new_player_period', 0)
 
@@ -56,15 +56,28 @@ def user(uname=''):
             match['participants'][1][0] == uname or
             uname == ''):
             matches.append(pretty_match(sort_match(match, uname)))
-            differential.append({u:(rank_history[i+1][u] - rank_history[i][u],
-                                    rank_history[i+1][u])
-                                 for u in get_all_users()})
+            
+            #differential.append({u:(rank_history[i+1][u] - rank_history[i][u],
+            #                        rank_history[i+1][u])
+            #                     for u in get_all_users()})
 
+    players = []
+    if uname != '':
+        players = [uname]
+    else:
+        players = get_all_users()
+
+    states, times = zip(*get_elo_ranks(get_matches(), True, players))
+    for s in states:
+        differential.append({u:(s[u]['rank_change'], s[u]['rank']) for u in players})
+    cur_state, cur_time = get_elo_ranks(get_matches(), False, [])
     matches.reverse()
     differential.reverse()
     differential = differential[:(matches_per_page+1)]
-    ranks = {u:r for u,r in rank_history[-1].items()}
-    leaderboard = [(r,u,games_played[-1][u]) for u,r in ranks.items()]
+    #ranks = {u:r for u,r in rank_history[-1].items()}
+    ranks = {u:cur_state[u]['rank'] for u in get_all_users()}
+    #leaderboard = [(r,u,games_played[-1][u]) for u,r in ranks.items()]
+    leaderboard = [(cur_state[u]['rank'], u, cur_state[u]['num_matches']) for u in get_all_users()] 
     leaderboard.sort(reverse=True)
     return flask.render_template('user.html',
                                  matches=matches[:matches_per_page],
@@ -88,27 +101,53 @@ def matchstr(match):
 @app.route('/<uname>/stats')
 def stats(uname=''):
     matches = get_matches()
-    rank_history = [r for r, n in get_elo_ranks(matches, history=True)]
-    rank_history = [{u:round(rank[u]) for u in get_all_users()}
-                    for rank in rank_history]
+    #rank_history = [r for r, n in get_elo_ranks(matches, history=True)]
+    #rank_history = [{u:round(rank[u]) for u in get_all_users()}
+    #                for rank in rank_history]
 
     date = datetime.fromtimestamp(matches[0]['time']-1)
     datestr = date.strftime('%m/%d/%YT%H:%M:%S')
-    urankl = [{'elo':rank_history[0][uname],
-              'time':matches[0]['time']-1,
-              'num':0,
-              'date':datestr,
-              'match':''}]
-    urankl = [{'player1':rank_history[0][uname],
-              'time':matches[0]['time']-1,
-              'num':0,
-              'date':datestr,
-              'match':''}]
+    #urankl = [{'elo':rank_history[0][uname],
+    #          'time':matches[0]['time']-1,
+    #          'num':0,
+    #          'date':datestr,
+    #          'match':''}]
+    #urankl = [{'player1':rank_history[0][uname],
+    #          'time':matches[0]['time']-1,
+    #          'num':0,
+    #          'date':datestr,
+    #          'match':''}]
     #print matches
     #print rank_history[0]
     n = 0
     urank = []
-    for i, ranks in enumerate(rank_history[1:]):
+    states, times = zip(*get_elo_ranks(matches, history=True, players=[uname]))
+    for i, state in enumerate(states):
+        date = datetime.fromtimestamp(times[i])
+        datestr = date.strftime('%m/%d/%YT%H:%M:%S')
+        #participants = [p[0] for p in matches[i]['participants']]
+        #scores = [p[1] for p in matches[i]['participants']]
+        #if uname in participants:
+        #    print ' in: ' + str(participants)
+        #else:
+        #    print 'out: ' + str(participants)
+
+        #if uname in participants:
+        match = sort_match(state[uname]['last_match'], uname)
+        
+        p1n = uname
+        p1s = match['participants'][0][1]
+        p1e = state[p1n]['rank']
+
+        p2n = match['participants'][1][0]
+        p2s = match['participants'][1][1]
+        p2e = state[p2n]['rank']
+        
+        urank.append({'date':datestr,
+                      'player1': get_display_name(p1n), 'player1score': p1s, 'player1elo': p1e,
+                      'player2': get_display_name(p2n), 'player2score': p2s, 'player2elo': p2e})
+    for i in [1, 2, 3]: #enumerate(rank_history[1:]):
+        continue 
         date = datetime.fromtimestamp(matches[i]['time'])
         datestr = date.strftime('%m/%d/%YT%H:%M:%S')
         participants = [p[0] for p in matches[i]['participants']]
