@@ -542,22 +542,21 @@ var allStats = function(error, data) {
           function chordTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
             return "Chord Info:<br/>"
-              +  d.sname + " imports from " + d.tname
-              + ": $" + q(d.svalue) + "M<br/>"
-              + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total ($" + q(d.stotal) + "M)<br/>"
-              + p(d.svalue/d.mtotal) + " of Matrix Total ($" + q(d.mtotal) + "M)<br/>"
+              +  d.sname + " took from " + d.tname
+              + ": " + q(d.svalue) + " pts<br/>"
+              + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total (" + q(d.stotal) + " pts)<br/>"
+              + p(d.svalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)<br/>"
               + "<br/>"
-              + d.tname + " imports from " + d.sname
-              + ": $" + q(d.tvalue) + "M<br/>"
-              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total ($" + q(d.ttotal) + "M)<br/>"
-              + p(d.tvalue/d.mtotal) + " of Matrix Total ($" + q(d.mtotal) + "M)";
+              + d.tname + " took from " + d.sname
+              + ": " + q(d.tvalue) + " pts<br/>"
+              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total (" + q(d.ttotal) + " pts)<br/>"
+              + p(d.tvalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)";
           }
 
           function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
-            return "Group Info:<br/>"
-                + d.gname + " : " + q(d.gvalue) + "M<br/>"
-                + p(d.gvalue/d.mtotal) + " of Matrix Total (" + q(d.mtotal) + "M)"
+            return "" + d.gname + ": " + q(d.gvalue) + " pts<br/>"
+                + p(d.gvalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)"
           }
 
           function mouseover(d, i) {
