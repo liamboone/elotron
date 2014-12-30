@@ -9,23 +9,26 @@ def get_elo_ranks(match_results, history=False, players=[]):
         return s, t
 
 def _elo_ranks(match_results, history=False, players=[]):
-    # first pass, figure out which user names are in the match results
     K = get_config('K', 15)
     K_new = get_config('K_new_player', 30)
 
     new_player_period = get_config('new_player_period', 0)
 
+    # first pass, figure out which user names are in the match results
     user_list = []
     for match in match_results:
         for (name, score) in match['participants']:
             if not name in user_list:
                 user_list.append(name)
 
-    if players == []:
+    # Determine which players we should be concerned about (default to all)
+    if players == [] or players == ['']:
         players = user_list
 
+    # Cull players who did not participate in any matches
     players = [p for p in players if p in user_list]
 
+    # initialize the state
     state = {}
     time = 0
     ranks = {}
@@ -33,24 +36,25 @@ def _elo_ranks(match_results, history=False, players=[]):
 
     for user in user_list:
         state[user] = {}
-        #ranks[user] = 1000
-        #num_games[user] = 0
         state[user]['pre_match_rank'] = 1000
         state[user]['post_match_rank'] = 1000
         state[user]['num_matches'] = 0
         state[user]['last_match'] = None
         state[user]['rank_change'] = None
 
-    #yield (ranks, num_games)
-    #yield (dict({u:dict(state[u]) for u in players}), None)
-
+    # Walk through all of the matches in order, updating the league rankings as we go
     for match in match_results:
+        # (name, score) pairs
         participants = match['participants']
+        
+        # A list of names
         part_names = [p[0] for p in participants]
 
         (name_a, score_a) = participants[0]
         (name_b, score_b) = participants[1]
-        
+       
+        # Compute the expected performance of each player (Qa or Qb) and
+        # to the realized performance (Sa or Sb)
         state[name_a]['pre_match_rank'] = state[name_a]['post_match_rank']
         state[name_b]['pre_match_rank'] = state[name_b]['post_match_rank']
 
@@ -70,9 +74,8 @@ def _elo_ranks(match_results, history=False, players=[]):
             Sa = 0.5
             Sb = 0.5
 
-        #if history:
-        #    ranks = dict(ranks)
-
+        # Determine which K-value to use for each player,
+        # based on how long they have been playing
         K_a = K
         K_b = K
 
@@ -80,6 +83,8 @@ def _elo_ranks(match_results, history=False, players=[]):
             K_a = K_new
         if state[name_b]['num_matches'] < new_player_period:
             K_b = K_new
+
+        # Update the state
         rank_change_a = K_a*(Sa-Ea)
         rank_change_b = K_b*(Sb-Eb)
 
@@ -93,7 +98,7 @@ def _elo_ranks(match_results, history=False, players=[]):
         state[name_a]['num_matches'] += 1
         state[name_b]['num_matches'] += 1
 
-        #yield (ranks, num_games)
+        # Yield updates for games when one of the participants is in the player list
         if len([p for p in players if p in part_names]) > 0:
             yield (dict({u:dict(state[u]) for u in part_names + players}), match['time'])
 
