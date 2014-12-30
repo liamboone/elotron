@@ -69,15 +69,15 @@ def user(uname=''):
 
     states, times = zip(*get_elo_ranks(get_matches(), True, players))
     for s in states:
-        differential.append({u:(s[u]['rank_change'], s[u]['rank']) for u in players})
+        differential.append({u:(s[u]['rank_change'], s[u]['post_match_rank']) for u in players})
     cur_state, cur_time = get_elo_ranks(get_matches(), False, [])
     matches.reverse()
     differential.reverse()
     differential = differential[:(matches_per_page+1)]
     #ranks = {u:r for u,r in rank_history[-1].items()}
-    ranks = {u:cur_state[u]['rank'] for u in get_all_users()}
+    ranks = {u:cur_state[u]['post_match_rank'] for u in get_all_users()}
     #leaderboard = [(r,u,games_played[-1][u]) for u,r in ranks.items()]
-    leaderboard = [(cur_state[u]['rank'], u, cur_state[u]['num_matches']) for u in get_all_users()] 
+    leaderboard = [(cur_state[u]['post_match_rank'], u, cur_state[u]['num_matches']) for u in get_all_users()] 
     leaderboard.sort(reverse=True)
     return flask.render_template('user.html',
                                  matches=matches[:matches_per_page],
@@ -137,11 +137,11 @@ def stats(uname=''):
         
         p1n = uname
         p1s = match['participants'][0][1]
-        p1e = state[p1n]['rank']
+        p1e = state[p1n]['pre_match_rank']
 
         p2n = match['participants'][1][0]
         p2s = match['participants'][1][1]
-        p2e = state[p2n]['rank']
+        p2e = state[p2n]['pre_match_rank']
         
         urank.append({'date':datestr,
                       'player1': get_display_name(p1n), 'player1score': p1s, 'player1elo': p1e,

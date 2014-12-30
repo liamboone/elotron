@@ -35,7 +35,8 @@ def _elo_ranks(match_results, history=False, players=[]):
         state[user] = {}
         #ranks[user] = 1000
         #num_games[user] = 0
-        state[user]['rank'] = 1000
+        state[user]['pre_match_rank'] = 1000
+        state[user]['post_match_rank'] = 1000
         state[user]['num_matches'] = 0
         state[user]['last_match'] = None
         state[user]['rank_change'] = None
@@ -49,9 +50,12 @@ def _elo_ranks(match_results, history=False, players=[]):
 
         (name_a, score_a) = participants[0]
         (name_b, score_b) = participants[1]
+        
+        state[name_a]['pre_match_rank'] = state[name_a]['post_match_rank']
+        state[name_b]['pre_match_rank'] = state[name_b]['post_match_rank']
 
-        Qa = 10.0**(state[name_a]['rank']/400.0)
-        Qb = 10.0**(state[name_b]['rank']/400.0)
+        Qa = 10.0**(state[name_a]['pre_match_rank']/400.0)
+        Qb = 10.0**(state[name_b]['pre_match_rank']/400.0)
 
         Ea = Qa / (Qa + Qb)
         Eb = Qb / (Qa + Qb)
@@ -83,8 +87,8 @@ def _elo_ranks(match_results, history=False, players=[]):
         state[name_b]['rank_change']=rank_change_b
         state[name_a]['last_match']=match
         state[name_b]['last_match']=match
-        state[name_a]['rank'] = state[name_a]['rank'] + rank_change_a
-        state[name_b]['rank'] = state[name_b]['rank'] + rank_change_b
+        state[name_a]['post_match_rank'] = state[name_a]['pre_match_rank'] + rank_change_a
+        state[name_b]['post_match_rank'] = state[name_b]['pre_match_rank'] + rank_change_b
 
         state[name_a]['num_matches'] += 1
         state[name_b]['num_matches'] += 1
