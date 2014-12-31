@@ -3,6 +3,7 @@ import flask
 from datetime import datetime
 from elotron_backend import *
 from rankings import *
+from itertools import product
 import numpy as np
 import base64 as b64
 import sys
@@ -55,8 +56,8 @@ def user(uname=''):
             match['participants'][1][0] == uname or
             uname == ''):
             matches.append(pretty_match(sort_match(match, uname)))
-    
-    # Get rank history for this use or all users
+
+    # Get rank history for this user or all users
     players = []
     if uname == '':
         players = get_all_users()
@@ -106,7 +107,7 @@ def stats(uname=''):
         date = datetime.fromtimestamp(times[i])
         datestr = date.strftime('%m/%d/%YT%H:%M:%S')
         match = sort_match(state[uname]['last_match'], uname)
-        
+
         p1n = uname
         p1s = match['participants'][0][1]
         p1e = round(state[p1n]['pre_match_rank'])
@@ -114,11 +115,37 @@ def stats(uname=''):
         p2n = match['participants'][1][0]
         p2s = match['participants'][1][1]
         p2e = round(state[p2n]['pre_match_rank'])
-        
+
         urank.append({'date':datestr,
-                      'player1': get_display_name(p1n), 'player1score': p1s, 'player1elo': p1e,
-                      'player2': get_display_name(p2n), 'player2score': p2s, 'player2elo': p2e})
+                      'player1': get_display_name(p1n),
+                      'player1score': p1s,
+                      'player1elo': p1e,
+                      'player2': get_display_name(p2n),
+                      'player2score': p2s,
+                      'player2elo': p2e})
     return json.dumps(urank)
+
+@app.route('/allstats')
+def allstats():
+    users = get_all_users()
+    points = {u:{v:0 for v in users if u != v} for u in users}
+
+    for match in get_matches():
+        (p1, s1), (p2, s2) = match['participants']
+        points[p1][p2] += s1
+        points[p2][p1] += s2
+
+    userPairs = [tuple(sorted((u,v)))
+                 for u,v in product(users, users) if u != v]
+    userPairs = set(userPairs) # Remove duplicates
+
+    data = [{'player1': get_display_name(u),
+             'player2': get_display_name(v),
+             'pointsTaken': points[u][v],
+             'pointsGiven': points[v][u]}
+            for u,v in userPairs]
+
+    return json.dumps(data)
 
 @app.route('/add_match/<match_b64>')
 def new_match(match_b64):

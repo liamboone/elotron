@@ -49,7 +49,7 @@ def get_config(name, default_val=None):
         return default_val
     else:
         return doc[name]
-    
+
 def add_config(name, val):
     if config_coll.find({name:{'$exists':True}}).count() > 0:
         raise Exception

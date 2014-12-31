@@ -449,10 +449,10 @@
     })();
     </script>
 {% else %}
-<p>Main page stats coming soon.</p>
 <div id="tooltip"></div>
 <script>
 var allStats = function(error, data) {
+  console.log(data);
   var mpr = chordMpr(data);
   mpr
     .addValuesToMap('player1')
@@ -572,10 +572,10 @@ var allStats = function(error, data) {
             });
           }
       }
-}
+};
     (function() 
     {
-        d3.json("/{{uname}}/stats", allStats);
+        d3.json("/allstats", allStats);
     })();
 </script>
 {% endif %}
