@@ -453,7 +453,7 @@
 <div id="tooltip" style=""></div>
 <script>
 var allStats = function(error, data) {
-    console.log(data);
+
     var mpr = chordMpr(data);
     mpr
         .addValuesToMap('player1')
@@ -476,8 +476,7 @@ var allStats = function(error, data) {
     function drawChords (matrix, mmap) {
         var w = 980, h = 800, r1 = h / 2, r0 = r1 - 110;
 
-        var fill = d3.scale.ordinal()
-            .range(['#c7b570','#c6cdc7','#335c64','#768935','#507282','#5c4a56','#aa7455','#574109','#837722','#73342d','#0a5564','#9c8f57','#7895a4','#4a5456','#b0a690','#0a3542',]);
+        var fill = d3.scale.category20();
 
         var chord = d3.layout.chord()
             .padding(.02)
