@@ -449,9 +449,38 @@
     })();
     </script>
 {% else %}
+
+<div id="tooltip" style="position:absolute;border:1px solid black; background-color:white;opacity:.85;padding:5px"></div>
 <div id="chart-chord" style=""></div>
-<div id="tooltip" style=""></div>
+<!-- ***********   
+needs to run only when "stats" tab is clicked, not on page load.
+*******************
 <script>
+$(document).ready(function(){
+         		bootstro.start();
+        	});
+</script>
+*******************
+-->
+
+<div class="col-md-4 bootstro" 
+        	data-bootstro-title="The Overview Chart" 
+        	data-bootstro-bootstro="This chart is designed to reflect Elotron activity over all time"
+        	data-bootstro-step='0'
+		data-bootstro-width='600'
+        	style="width:600px">
+        	<h2>The Arcs</h2>
+          <p><i class='icon-ok'></i> <b>Each arc on the outside of the circle</b> reflects the total number of points a given player has scored against all opponents (i.e., 'taken' points).</p>
+          <p>The colors of each arc are randomly assigned, so they might change upon page reloads.</p>
+	<h2>The Chords</h2>
+	<p><i class='icon-ok'></i> <b>Each chord propogating from each arc</b> reflects the relationship between two players</i>.</p>
+	<p>The chord will be colored to indicate which player has scored more points than the other.</p>
+	<p>The relative sizes of the two ends of a chord also indicate the numbers of points scored against the other player.</p>
+        <h2>Interact</h2>
+	<p>Mouse over any player's outer arc to get detailed info on their activity and stats. Mouse over any chord to get detailed info on the interaction between the two players that the chord connects.</p>
+</div>
+<script>
+
 var allStats = function(error, data) {
 
     var mpr = chordMpr(data);
@@ -476,7 +505,7 @@ var allStats = function(error, data) {
     function drawChords (matrix, mmap) {
         var w = 980, h = 800, r1 = h / 2, r0 = r1 - 110;
 
-        var fill = d3.scale.category20();
+        var fill = d3.scale.category20c();
 
         var chord = d3.layout.chord()
             .padding(.02)
@@ -578,6 +607,7 @@ var allStats = function(error, data) {
 (function() 
  {
  d3.json("/allstats", allStats);
+
  })();
 </script>
 {% endif %}
