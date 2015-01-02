@@ -565,12 +565,12 @@ var allStats = function(error, data) {
         function chordTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
                 return "Chord Info:<br/>"
-                +  d.sname + " took from " + d.tname
+                +  d.sname + " scored against " + d.tname
                 + ": " + q(d.svalue) + " pts<br/>"
                 + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total (" + q(d.stotal) + " pts)<br/>"
                 + p(d.svalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)<br/>"
                 + "<br/>"
-                + d.tname + " took from " + d.sname
+                + d.tname + " scored against " + d.sname
                 + ": " + q(d.tvalue) + " pts<br/>"
                 + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total (" + q(d.ttotal) + " pts)<br/>"
                 + p(d.tvalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)";
@@ -578,7 +578,7 @@ var allStats = function(error, data) {
 
         function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
-                return "" + d.gname + ": " + q(d.gvalue) + " pts<br/>"
+                return "" + d.gname + " scored in total: " + q(d.gvalue) + " pts<br/>"
                 + p(d.gvalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)"
         }
 
