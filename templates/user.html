@@ -193,14 +193,15 @@
 
 {% block stats_content %}
 {% if uname != '' %}
-    <div id="chart-timeline" style=""></div>
-    <div id="chart-opponents" style="float:right"><div style="position:absolute;top:315px;padding-left:75px;text-align:center">Number of Games<br/>Against Each Opponent</div></div>
+	<div id="intro" class="bootstro" data-bootstro-title="Welcome to your stats!" data-bootstro-placement="bottom" data-bootstro-content="This page allows you to explore your ping pong performance through several dimensions, including scores, Elo rankings, opponents, and time.<br/><b>All of the charts are clickable</b> to filter the data. (When you filter data using one chart, all others will immediately update to reflect the filter you applied.)<br/> Click 'Next' or use your right arrow key to begin a short tour of the various charts."></div>
+    <div id="chart-timeline" style="" class="bootstro" data-bootstro-placement="bottom" data-bootstro-title="My Timeline" data-bootstro-content="Each lollipop on the timeline reflects a game you played</b>, with its vertical position determined by the difference of your score and your opponent's score in that game. <b>The size of each bubble reflects your opponents' Elo rating in that game</b> -- the bigger the bubble, the higher the Elo rating (i.e., the harder the game).<br/>You can click and drag along the X axis to filter a specific range of time. To remove the filter, click the timeline outside of the newly selected area."></div>
+    <div id="chart-opponents" style="float:right" class="bootstro" data-bootstro-placement="left" data-bootstro-title="My Opponents" data-bootstro-content="This pie chart reflects the proportion of games you've played against each opponent. You can click on one of the opponents' slices to filter all other charts; in this way, you can track your scores against opponents over time, or easily see your win/loss ratio.<br/>(Try it now! Click on a player's slice to filter all other views by your games against that player. Then simply click on the slice again to remove the filter.)"><div style="position:absolute;top:315px;padding-left:75px;text-align:center">Number of Games<br/>Against Each Opponent</div></div>
 
-    <div id="chart-pointsTaken" style="margin: 30px 5px 10px 10px"></div>
-    <div id="chart-winsLosses" style="margin: 30px 15px 10px 0px"></div>
-    <div id="chart-pointsTakenElo" style="margin: 30px 0px 10px 30px"></div>
+    <div id="chart-pointsTaken" style="margin: 30px 0px 10px 10px" class="bootstro" data-bootstro-placement="right" data-bootstro-title="Score Histogram" data-bootstro-content="The score histogram can help answer questions like 'How many games have I scored above 15 against Roy?'<br/>You may also click and drag along the X axis to filter a range of your game scores. (Try it now! To remove the filter, simply click once anywhere else on this chart outside the highlighted range.)"></div>
+    <div id="chart-winsLosses" style="margin: 30px 15px 10px -20px" class="bootstro" data-bootstro-title="Piece of Cake...er, Pie" data-bootstro-content="This pie chart will always reflect your win/loss ratio for any filters currently applied. You can also click on one of the slices to filter only wins or losses to other views.<br/>(Try it now! When done, simply click on the slice again to unfilter it.)"></div>
+    <div id="chart-pointsTakenElo" style="margin: 30px 0px 10px 20px" class="bootstro" data-bootstro-title="Score vs. Elo Scatterplot" data-bootstro-content="This scatterplot can reveal trends in your scoring against players of all Elo ratings. Currently, filtering only works in the horizontal direction, even though clicking and dragging will appear to also filter vertically. To remove the filter, click once anywhere else on the plot outside of the shaded area.)"></div>
 
-    <div style="clear:both;padding:50px">
+    <div style="clear:both;padding:50px" class="bootstro" data-bootstro-title="The nitty gritty" data-bootstro-content="This table is the raw data itself, reflecting any filters you've applied above. You probably won't want to look at this very often, and even then only after you've applied a few filters.">
         <table id="dc-data-table">
             <thead>
                 <tr class="header">
@@ -357,7 +358,7 @@
 
     timelineChart = dc.compositeChart("#chart-timeline");
     timelineChart
-        .width(900).height(200)
+        .width(800).height(200)
         .dimension(dateDim)
         .y(d3.scale.linear().domain([-21,21]))
         .yAxisLabel('End-game Point Differential')
@@ -389,7 +390,7 @@
     /* *** for number of games in which each amount of points was achieved ***/
     var pointsTakenChart = dc.barChart("#chart-pointsTaken");
     pointsTakenChart
-        .width(350).height(200)
+        .width(300).height(200)
         .dimension(pointsDim)
         .group(pointsGroup)
         .x(d3.scale.linear().domain([0,pointsDim.top(1)[0].player1score+2]))
@@ -402,7 +403,7 @@
     /* ***  for cumulative points scored against each elo rating ***/
     var pointsTaken2Chart = dc.scatterPlot("#chart-pointsTakenElo");
     pointsTaken2Chart
-        .width(350).height(200)
+        .width(330).height(200)
         .dimension(elo2Dim)
         .group(scoreAgainstElo2group)
         .keyAccessor(function(d) {return d.key})
@@ -450,26 +451,15 @@
     </script>
 {% else %}
 
-<div id="tooltip" style="position:absolute;border:1px solid black; background-color:white;opacity:.85;padding:5px"></div>
+<div id="tooltip" style="border:1px solid black; background-color:white;color:black;opacity:.85;padding:5px"></div>
 <div id="chart-chord" style=""></div>
-<!-- ***********   
-needs to run only when "stats" tab is clicked, not on page load.
-*******************
-<script>
-$(document).ready(function(){
-         		bootstro.start();
-        	});
-</script>
-*******************
--->
 
-<div class="col-md-4 bootstro" 
+<div class='bootstro' 
         	data-bootstro-title="The Overview Chart" 
-        	data-bootstro-bootstro="This chart is designed to reflect Elotron activity over all time"
-        	data-bootstro-step='0'
-		data-bootstro-width='600'
-        	style="width:600px">
-        	<h2>The Arcs</h2>
+        	data-bootstro-content="This chord diagram reflects Elotron's stats on all players/games. The three main parts of the chord diagram are:<br/> 1) <b>the outer arcs</b>,<br/> 2) <b>the chords</b>, and<br/> 3) <b>the details</b> available by mousing over the arcs and chords."
+        	data-bootstro-width='600px' 
+        	data-bootstro-placement='bottom' data-bootstro-step='0'></div>
+<h2>The Arcs</h2>
           <p><i class='icon-ok'></i> <b>Each arc on the outside of the circle</b> reflects the total number of points a given player has scored against all opponents (i.e., 'taken' points).</p>
           <p>The colors of each arc are randomly assigned, so they might change upon page reloads.</p>
 	<h2>The Chords</h2>
@@ -478,6 +468,8 @@ $(document).ready(function(){
 	<p>The relative sizes of the two ends of a chord also indicate the numbers of points scored against the other player.</p>
         <h2>Interact</h2>
 	<p>Mouse over any player's outer arc to get detailed info on their activity and stats. Mouse over any chord to get detailed info on the interaction between the two players that the chord connects.</p>
+
+        	
 </div>
 <script>
 
