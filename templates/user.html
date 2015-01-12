@@ -54,7 +54,7 @@
         <span class="input-group-addon" style="text-align:left;background-color:#fff;width:100%;border-right:#ddd">
             <h3 class="panel-title">
                 {% for i, player in enumerate(match.participants) %}
-                {% if i != 0 %} vs {% endif %}
+                {% if i != 0 %}<br class="visible-xs"> vs {% endif %}
                 <a href="/{{player[0]}}" 
                     style="text-decoration:none;">
                     <b>{{ users[player[0]] }}</b>
