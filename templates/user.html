@@ -50,47 +50,50 @@
 {% block match_content %}
 {{super()}}
     {% for m, match in enumerate(matches) %}
-    <div id="match" class="panel panel-default">
-        <div id="participants" class="panel-body">
-            {% if uname != '' %}
-            <div style="float:left" class="right-divider">
-                {% if differential[m][uname][0] < 0 %}
-                <span class="badge alert-danger">
-                {{ differential[m][uname][1]|int }}
-                    <span class="glyphicon glyphicon-arrow-down">
-                    </span>
-                {% elif differential[m][uname][0] > 0 %}
-                <span class="badge alert-success">
-                {{ differential[m][uname][1]|int }}
-                    <span class="glyphicon glyphicon-arrow-up">
-                    </span>
-                {% else %}
-                <span class="badge">
-                {{ differential[m][uname][1]|int }}
-                {% endif %}
-                {{ differential[m][uname][0]|abs|int }}
-                </span>
-            </div>
-            {% endif %}
-            <div style="float:left">
-                    {% for i, player in enumerate(match.participants) %}
-                    {% if i != 0 %}<small> vs </small>{% endif %}
-                    <a href="/{{player[0]}}" 
-                        style="text-decoration:none;">
-                            <b>{{ users[player[0]] }}</b>
-                            {% if i == match.winner %}
-                            <span class="badge alert-info">
-                            {% else %}
-                            <span class="badge">
-                            {% endif %}
-                            {{ player[1] }}
-                            </span>
-                    </a>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+    <div id="match" class="input-group">
+        <span class="input-group-addon" style="text-align:left;background-color:#fff;width:100%;border-right:#ddd">
+            <h3 class="panel-title">
+                {% for i, player in enumerate(match.participants) %}
+                {% if i != 0 %} vs {% endif %}
+                <a href="/{{player[0]}}" 
+                    style="text-decoration:none;">
+                    <b>{{ users[player[0]] }}</b>
+                    {% if i == match.winner %}
+                    <span class="badge">{{ player[1] }}</span>
+                    {% else %}
+                    <span class="badge">{{ player[1] }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </h3>
+        </span>
+        {% if uname != '' %}
+        {% if differential[m][uname][0] < 0 %}
+        <span class="input-group-addon loss" style="">
+            <h3 class="panel-title">
+                <div style="float:right;">
+                    {{ differential[m][uname][1]|int }}
+                    <span class="glyphicon glyphicon-arrow-down"></span>
+                    {{ differential[m][uname][0]|abs|int }}
+                </div>
+            </h3>
+        </span>
+        {% else %}
+        <span class="input-group-addon win" style="">
+            <h3 class="panel-title">
+                <div style="float:right;">
+                    {{ differential[m][uname][1]|int }}
+                    <span class="glyphicon glyphicon-arrow-up"></span>
+                    {{ differential[m][uname][0]|abs|int }}
+                </div>
+            </h3>
+        </span>
+        {% endif %}
+        {% else %}
+        <span class="input-group-addon"style="background-color:#fff"></span>
+        {% endif %}
     </div>
+            <br />
     {% endfor %}
 {% endblock %}
 
