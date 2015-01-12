@@ -51,20 +51,30 @@
 {{super()}}
     {% for m, match in enumerate(matches) %}
     <div id="match" class="input-group">
-        <span class="input-group-addon" style="text-align:left;background-color:#fff;width:100%;border-right:#ddd">
+        <span class="input-group-addon" style="text-align:left;background-color:#fff;width:100%;">
             <h3 class="panel-title">
-                {% for i, player in enumerate(match.participants) %}
-                {% if i != 0 %}<br class="visible-xs"> vs {% endif %}
-                <a href="/{{player[0]}}" 
-                    style="text-decoration:none;">
-                    <b>{{ users[player[0]] }}</b>
+                <div class="right-divider visible-xs" style="float:left;">
+                    {% for i, player in enumerate(match.participants) %}
+                    {% if i != 0 %}<br class="visible-xs">{% endif %}
                     {% if i == match.winner %}
-                    <span class="badge">{{ player[1] }}</span>
+                    <b>{{ player[1] }}</b>
                     {% else %}
-                    <span class="badge">{{ player[1] }}</span>
+                    {{ player[1] }}
                     {% endif %}
+                    {% endfor %}
+                </div>
+                <div style="color:inherit">
+                {% for i, player in enumerate(match.participants) %}
+                {% if i != 0 %}<br class="visible-xs">{% endif %}
+                {% if i != 0 %}<small>vs</small>{% endif %}
+                <a id="player-link" href="/{{player[0]}}">
+                    {% if i == match.winner %}<b>{% endif %}
+                    {{ users[player[0]] }}
+                    <span class="score-badge hidden-xs">{{ player[1] }}</span>
+                    {% if i == match.winner %}</b>{% endif %}
                 </a>
                 {% endfor %}
+                </div>
             </h3>
         </span>
         {% if uname != '' %}
