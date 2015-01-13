@@ -53,9 +53,9 @@
     <div id="match" class="input-group">
         <span class="input-group-addon" style="text-align:left;background-color:#fff;width:100%;">
             <h3 class="panel-title">
-                <div class="right-divider visible-xs" style="float:left;">
+                <div class="right-divider" style="float:left;">
                     {% for i, player in enumerate(match.participants) %}
-                    {% if i != 0 %}<br class="visible-xs">{% endif %}
+                    {% if i != 0 %}<br>{% endif %}
                     {% if i == match.winner %}
                     <b>{{ player[1] }}</b>
                     {% else %}
@@ -65,12 +65,11 @@
                 </div>
                 <div style="color:inherit">
                 {% for i, player in enumerate(match.participants) %}
-                {% if i != 0 %}<br class="visible-xs">{% endif %}
+                {% if i != 0 %}<br class="">{% endif %}
                 {% if i != 0 %}<small>vs</small>{% endif %}
                 <a id="player-link" href="/{{player[0]}}">
                     {% if i == match.winner %}<b>{% endif %}
                     {{ users[player[0]] }}
-                    <span class="score-badge hidden-xs">{{ player[1] }}</span>
                     {% if i == match.winner %}</b>{% endif %}
                 </a>
                 {% endfor %}
@@ -82,12 +81,12 @@
         <span class="input-group-addon loss" style="">
             <h3 class="panel-title">
                 <div style="float:right;width:85px;text-align:right;">
+                <span style="float:right;width:25px;text-align:left;padding-left:5px">
+                    {{ differential[m][uname][0]|abs|int }}
+                </span>
                 <span style="text-align:right;">
                     {{ differential[m][uname][1]|int }}
                     <span class="glyphicon glyphicon-arrow-down"></span>
-                </span>
-                <span style="float:right;width:25px;text-align:left;padding-left:5px">
-                    {{ differential[m][uname][0]|abs|int }}
                 </span>
                 </div>
             </h3>
@@ -96,19 +95,21 @@
         <span class="input-group-addon win" style="">
             <h3 class="panel-title">
                 <div style="float:right;width:85px;text-align:right;">
+                <span style="float:right;width:25px;text-align:left;padding-left:5px">
+                    {{ differential[m][uname][0]|abs|int }}
+                </span>
                 <span style="text-align:right;">
                     {{ differential[m][uname][1]|int }}
                     <span class="glyphicon glyphicon-arrow-up"></span>
-                </span>
-                <span style="float:right;width:25px;text-align:left;padding-left:5px">
-                    {{ differential[m][uname][0]|abs|int }}
                 </span>
                 </div>
             </h3>
         </span>
         {% endif %}
         {% else %}
-        <span class="input-group-addon"style="background-color:#fff"></span>
+        <span class="input-group-addon" style="background-color:#ddd">
+            <div style="float:right; width:5px"></div>
+        </span>
         {% endif %}
     </div>
             <br />
