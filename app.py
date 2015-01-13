@@ -135,8 +135,8 @@ def allstats():
         (p1, s1), (p2, s2) = match['participants']
 	games[p1][p2] += 1
 	games[p2][p1] += 1
-        points[p1][p2] = (points[p1][p2] + s1) / games[p1][p2]
-        points[p2][p1] = (points[p2][p1] + s2) / games[p2][p1]
+        points[p1][p2] = ((games[p1][p2]-1)*points[p1][p2] + s1) / games[p1][p2]
+        points[p2][p1] = ((games[p2][p1]-1)*points[p2][p1] + s2) / games[p2][p1]
 
     userPairs = [tuple(sorted((u,v)))
                  for u,v in product(users, users) if u != v]
