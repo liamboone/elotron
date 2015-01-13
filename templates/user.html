@@ -587,22 +587,18 @@ var allStats = function(error, data) {
         function chordTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
                 return "Chord Info:<br/>"
-                +  d.sname + " scored against " + d.tname
+                +  d.sname + " average game score against " + d.tname
                 + ": " + q(d.svalue) + " pts<br/>"
-                + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total (" + q(d.stotal) + " pts)<br/>"
-                + p(d.svalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)<br/>"
                 + "<br/>"
-                + d.tname + " scored against " + d.sname
-                + ": " + q(d.tvalue) + " pts<br/>"
-                + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total (" + q(d.ttotal) + " pts)<br/>"
-                + p(d.tvalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)";
+                + d.tname + " average game score against " + d.sname
+                + ": " + q(d.tvalue) + " pts<br/>";
         }
 
-        function groupTip (d) {
+        /*function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
-                return "" + d.gname + " scored in total: " + q(d.gvalue) + " pts<br/>"
-                + p(d.gvalue/d.mtotal) + " of All Points in Elotron (" + q(d.mtotal) + " pts)"
-        }
+                return "" + d.gname + " average overall score per game: (coming soon) pts<br/>"
+                + "(coming soon)% of average average score in Elotron ((coming soon) pts)"
+        }*/
 
         function mouseover(d, i) {
             d3.select("#tooltip")
