@@ -129,11 +129,14 @@ def stats(uname=''):
 def allstats():
     users = get_all_users()
     points = {u:{v:0 for v in users if u != v} for u in users}
+    games = {u:{v:0 for v in users if u != v} for u in users}
 
     for match in get_matches():
         (p1, s1), (p2, s2) = match['participants']
-        points[p1][p2] += s1
-        points[p2][p1] += s2
+	games[p1][p2] += 1
+	games[p2][p1] += 1
+        points[p1][p2] = (points[p1][p2] + s1) / games[p1][p2]
+        points[p2][p1] = (points[p2][p1] + s2) / games[p2][p1]
 
     userPairs = [tuple(sorted((u,v)))
                  for u,v in product(users, users) if u != v]
