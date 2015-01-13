@@ -548,7 +548,7 @@ var allStats = function(error, data) {
             .enter().append("svg:g")
             .attr("class", "group")
             .on("mouseover", mouseover)
-            .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+            .on("mouseout", mouseout);
 
         g.append("svg:path")
             .style("stroke", "black")
@@ -594,11 +594,11 @@ var allStats = function(error, data) {
                 + ": " + q(d.tvalue) + " pts<br/>";
         }
 
-        /*function groupTip (d) {
+        function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.2f")
                 return "" + d.gname + " average overall score per game: (coming soon) pts<br/>"
                 + "(coming soon)% of average average score in Elotron ((coming soon) pts)"
-        }*/
+        }
 
         function mouseover(d, i) {
             d3.select("#tooltip")
@@ -612,6 +612,10 @@ var allStats = function(error, data) {
                         && p.target.index != i;
                         });
         }
+	function mouseout(d) {
+		chordPaths.classed("fade", function(p) {return false; });
+		d3.select("#tooltip").style("visibility", "hidden");	
+	}
     }
 };
 (function() 
