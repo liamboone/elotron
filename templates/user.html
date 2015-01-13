@@ -579,8 +579,8 @@ var allStats = function(error, data) {
                     d3.select("#tooltip")
                     .style("visibility", "visible")
                     .html(chordTip(rdr(d)))
-                    .style("top", function () { return (d3.event.pageY - 170)+"px"})
-                    .style("left", function () { return (d3.event.pageX - 100)+"px";})
+                    .style("top", function () { return (d3.event.pageY - 10)+"px"})
+                    .style("left", function () { return (d3.event.pageX - 10)+"px";})
                     })
         .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
 
@@ -604,8 +604,8 @@ var allStats = function(error, data) {
             d3.select("#tooltip")
                 .style("visibility", "visible")
                 .html(groupTip(rdr(d)))
-                .style("top", function () { return (d3.event.pageY - 80)+"px"})
-                .style("left", function () { return (d3.event.pageX - 130)+"px";})
+                .style("top", function () { return (d3.event.pageY - 10)+"px"})
+                .style("left", function () { return (d3.event.pageX - 10)+"px";})
 
                 chordPaths.classed("fade", function(p) {
                         return p.source.index != i
