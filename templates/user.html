@@ -49,9 +49,12 @@
 
 {% block match_content %}
 {{super()}}
+<div class="row" style="padding-left:1em;padding-right:1em;">
     {% for m, match in enumerate(matches) %}
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="padding:0.5em;padding-top:0;padding-bottom:1em;">
     <div id="match" class="input-group">
-        <span class="input-group-addon" style="text-align:left;background-color:#fff;width:100%;">
+        <span class="input-group-addon" 
+              style="text-align:left;background-color:#fff;width:100%;">
             <h3 class="panel-title">
                 <div class="right-divider" style="float:left;">
                     {% for i, player in enumerate(match.participants) %}
@@ -80,8 +83,8 @@
         {% if differential[m][uname][0] < 0 %}
         <span class="input-group-addon loss" style="">
             <h3 class="panel-title">
-                <div style="float:right;width:85px;text-align:right;">
-                <span style="float:right;width:25px;text-align:left;padding-left:5px">
+                <div style="float:right;width:75px;text-align:right;">
+                <span style="float:right;width:20px;text-align:left;padding-left:5px">
                     {{ differential[m][uname][0]|abs|int }}
                 </span>
                 <span style="text-align:right;">
@@ -94,8 +97,8 @@
         {% else %}
         <span class="input-group-addon win" style="">
             <h3 class="panel-title">
-                <div style="float:right;width:85px;text-align:right;">
-                <span style="float:right;width:25px;text-align:left;padding-left:5px">
+                <div style="float:right;width:75px;text-align:right;">
+                <span style="float:right;width:20px;text-align:left;padding-left:5px">
                     {{ differential[m][uname][0]|abs|int }}
                 </span>
                 <span style="text-align:right;">
@@ -112,8 +115,9 @@
         </span>
         {% endif %}
     </div>
-            <br />
+    </div>
     {% endfor %}
+</div>
 {% endblock %}
 
 {% block add_match %}

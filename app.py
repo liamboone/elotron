@@ -35,7 +35,7 @@ def pretty_match(match):
 @app.route('/<uname>')
 def user(uname=''):
     leaderboard_len = get_config('leaderboard_length', 10)
-    matches_per_page = get_config('matches_per_page', 25)
+    matches_per_page = get_config('matches_per_page', 24)
     new_player_period = get_config('new_player_period', 0)
 
     admin = False
