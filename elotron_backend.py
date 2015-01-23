@@ -126,14 +126,6 @@ def add_match(results):
 def add_match_on_day(results, month, day):
     _add_match(results, timestamp_month_day(month, day))
 
-def get_participant_name(login):
-    doc = prts_coll.find_one({"login":login})
-
-    if doc==None:
-        return None
-
-    return doc['display_name']
-
 def get_matches():
     docs = matches_coll.find().sort("time")
 
