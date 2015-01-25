@@ -2,9 +2,11 @@ from pymongo import MongoClient
 import time
 import calendar
 import os
+import hashlib
 from itertools import permutations
 from random import randint
 from datetime import datetime
+from base64 import b64encode, b64decode
 
 class DuplicateError(Exception):
     pass
@@ -17,6 +19,7 @@ except KeyError:
 participants_collection_name = 'participants'
 matches_collection_name = 'matches'
 config_collection_name = 'config'
+user_collection_name = 'users'
 
 try:
     mongo_uri = os.environ['MONGOHQ_URL']
@@ -29,6 +32,7 @@ db = client[db_name]
 prts_coll = db[participants_collection_name]
 matches_coll = db[matches_collection_name]
 config_coll = db[config_collection_name]
+user_coll = db[user_collection_name]
 
 def timestamp_now():
     return calendar.timegm(time.gmtime())
@@ -68,6 +72,27 @@ def add_participant(display_name, login):
 
     prts_coll.insert(doc)
 
+def create_user(login, password):
+    if user_coll.find({"login":login}).count() > 0:
+        raise Exception('{} already exists'.format(login))
+
+    salt = os.urandom(512)
+    doc = {'login': login,
+           'pw': hashlib.sha512(salt + password).hexdigest(),
+           'salt': b64encode(salt)}
+
+    user_coll.insert(doc)
+
+def validate_user(login, password):
+    doc = user_coll.find_one({"login":login})
+
+    if doc == None:
+        raise Exception('{} does not exist'.format(login))
+
+    pw = hashlib.sha512(b64decode(doc['salt']) + password).hexdigest()
+
+    return pw == doc['pw']
+
 def get_active_players():
     '''Determine which players are active based on two conditions:
     A player is active if they have played more than [leaderboard_activity_games] 
@@ -77,13 +102,13 @@ def get_active_players():
     new_player_period = get_config('new_player_period', 0)
     leaderboard_activity_days = get_config('leaderboard_activity_days', 30)
     leaderboard_activity_games = get_config('leaderboard_activity_games', 5)
-   
+
     cur_time = timestamp_now()
     time_diff = 3600*24*leaderboard_activity_days
 
     recent_match_epoch = cur_time - time_diff
     state = {}
-    
+
     for p in get_all_users():
         state[p] = {}
         state[p]['all_matches'] = 0
@@ -181,7 +206,7 @@ def get_display_name(login):
     doc = prts_coll.find_one({'login':login})
     if doc == None:
         raise Exception
-    
+
     return doc['display_name']
 
 def get_all_users():
@@ -221,7 +246,7 @@ def setup_test_db():
 
         # test duplicate detection
         two_pts = randint(0, 19)
-        
+
         for i in range(4):
             try:
                 add_match([(one, 21), (two, two_pts)])
