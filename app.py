@@ -1,5 +1,6 @@
 import json
 import flask
+from flask import request
 from datetime import datetime
 from elotron_backend import *
 from rankings import *
@@ -9,6 +10,7 @@ import base64 as b64
 import sys
 
 app = flask.Flask(__name__)
+app.secret_key = "CHANGE_ME"
 
 def _match_cmp(x, y, uname):
     if x[0] == uname:
@@ -32,11 +34,30 @@ def pretty_match(match):
     return match
 
 @app.route('/')
-@app.route('/<uname>')
-def user(uname=''):
+def index():
+    return flask.render_template('index.html')
+
+@app.route('/login/', methods=['POST'])
+def handle_login():
+    login = str(request.form['inputLogin'])
+    password = str(request.form['inputPassword'])
+
+    try:
+        if validate_user(login, password):
+            flask.session['username'] = login
+            return flask.redirect('/player')
+    except Exception as e:
+        return str(e)
+
+    return flask.redirect('/')
+
+@app.route('/player')
+def user():
     leaderboard_len = get_config('leaderboard_length', 10)
     matches_per_page = get_config('matches_per_page', 24)
     new_player_period = get_config('new_player_period', 0)
+
+    uname = flask.escape(flask.session['username'])
 
     admin = False
     if uname.endswith("    "):
@@ -72,17 +93,17 @@ def user(uname=''):
 
     # This call returns the final state of all players in the match history
     cur_state, cur_time = get_elo_ranks(match_history, history=False, players=[])
-    
+
     matches.reverse()
     differential.reverse()
     differential = differential[:(matches_per_page+1)]
     ranks = {u:round(cur_state[u]['post_match_rank']) for u in get_all_users()}
-    leaderboard = [(round(cur_state[u]['post_match_rank']), u, cur_state[u]['num_matches']) for u in get_all_users()] 
+    leaderboard = [(round(cur_state[u]['post_match_rank']), u, cur_state[u]['num_matches']) for u in get_all_users()]
     leaderboard.sort(reverse=True)
-    
+
     active_state = get_active_players()
     leaderboard = [l for l in leaderboard if active_state[l[1]]==True]
-    
+
     return flask.render_template('user.html',
                                  matches=matches[:matches_per_page],
                                  leaderboard=leaderboard[:leaderboard_len],

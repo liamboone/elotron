@@ -83,6 +83,16 @@ def create_user(login, password):
 
     user_coll.insert(doc)
 
+def update_user(login, password):
+    doc = user_coll.find_one({"login":login})
+
+    salt = os.urandom(512)
+    doc = {'login': login,
+           'pw': hashlib.sha512(salt + password).hexdigest(),
+           'salt': b64encode(salt)}
+
+    user_coll.update({"login":login}, {"$set":doc}, upsert=False)
+
 def validate_user(login, password):
     doc = user_coll.find_one({"login":login})
 
