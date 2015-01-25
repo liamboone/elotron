@@ -68,6 +68,44 @@ def add_participant(display_name, login):
 
     prts_coll.insert(doc)
 
+def get_active_players():
+    '''Determine which players are active based on two conditions:
+    A player is active if they have played more than [leaderboard_activity_games] 
+    games in the last [leaderboard_activity_days],
+    or if they have played more than [new_player_period] games overall'''
+
+    new_player_period = get_config('new_player_period', 0)
+    leaderboard_activity_days = get_config('leaderboard_activity_days', 30)
+    leaderboard_activity_games = get_config('leaderboard_activity_games', 5)
+   
+    cur_time = timestamp_now()
+    time_diff = 3600*24*leaderboard_activity_days
+
+    recent_match_epoch = cur_time - time_diff
+    state = {}
+    
+    for p in get_all_users():
+        state[p] = {}
+        state[p]['all_matches'] = 0
+        state[p]['recent_matches'] = 0
+
+    for match in get_matches():
+        for p in match['participants']:
+            p = p[0]
+            state[p]['all_matches'] += 1
+            if match['time'] >= recent_match_epoch:
+                state[p]['recent_matches'] += 1
+
+    active_state = {}
+    for p in state.keys():
+        active_state[p] = False
+        if state[p]['all_matches'] >= new_player_period:
+            active_state[p] = True
+        if state[p]['recent_matches'] >= leaderboard_activity_games:
+            active_state[p] = True
+
+    return active_state
+
 def check_match_duplicate(match_results, timestamp):
     matches = get_matches()
 

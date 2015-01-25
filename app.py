@@ -79,6 +79,10 @@ def user(uname=''):
     ranks = {u:round(cur_state[u]['post_match_rank']) for u in get_all_users()}
     leaderboard = [(round(cur_state[u]['post_match_rank']), u, cur_state[u]['num_matches']) for u in get_all_users()] 
     leaderboard.sort(reverse=True)
+    
+    active_state = get_active_players()
+    leaderboard = [l for l in leaderboard if active_state[l[1]]==True]
+    
     return flask.render_template('user.html',
                                  matches=matches[:matches_per_page],
                                  leaderboard=leaderboard[:leaderboard_len],
