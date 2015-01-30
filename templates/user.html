@@ -403,7 +403,7 @@
         .group(winGroup)
         .colorAccessor(function(d) {return d.key})
         .colors(d3.scale.ordinal().domain(["Losses","Wins"]).range(["darkred","green"]))
-        .label(function(d) {if(all.value){return d.key + " " + Math.round(d.value / all.value()*100) + '%';}});
+        .label(function(d) {if(all.value){return d.key + " (" + d.value + ')';}});
 
     var opponentsChart = dc.pieChart("#chart-opponents");
     opponentsChart
