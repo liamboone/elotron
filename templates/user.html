@@ -486,14 +486,14 @@
         	data-bootstro-width='600px' 
         	data-bootstro-placement='bottom' data-bootstro-step='0'></div>
 <h2>The Arcs</h2>
-          <p><i class='icon-ok'></i> <b>Each arc on the outside of the circle</b> reflects the total number of points a given player has scored against all opponents (i.e., 'taken' points).</p>
-          <p>The colors of each arc are randomly assigned, so they might change upon page reloads.</p>
+          <p><i class='icon-ok'></i> <b>Each colored arc on the outside of the circle</b> reflects one player, clearly labeled outside the circle.</p>
+          <p>The length of the arc is determined by 2 factors: the number of opponents played, and the average score against each opponent.</p>
+        <p>The colors of each arc are randomly assigned, so they might change after page reloads or newly added games.</p>
 	<h2>The Chords</h2>
-	<p><i class='icon-ok'></i> <b>Each chord propogating from each arc</b> reflects the relationship between two players</i>.</p>
-	<p>The chord will be colored to indicate which player has scored more points than the other.</p>
-	<p>The relative sizes of the two ends of a chord also indicate the numbers of points scored against the other player.</p>
+	<p><i class='icon-ok'></i> <b>Each chord propogating from each player's arc</b> reflects that player's average score against the opponent to which the chord connects</i>. If the chord is the same color as the player's arc, then the player has averaged a higher score than that opponent.</p>
+	<p>In addition to the color of the chord, the relative sizes of the two ends of a chord also indicate the average score achieved by both players.</p>
         <h2>Interact</h2>
-	<p>Mouse over any player's outer arc to get detailed info on their activity and stats. Mouse over any chord to get detailed info on the interaction between the two players that the chord connects.</p>
+	<p>Mouse over any player's outer arc to get detailed info on their averages against specific players. Mouse over any chord to get detailed info on the interaction between the two players that the chord connects.</p>
 
         	
 </div>
@@ -579,13 +579,16 @@ var allStats = function(error, data) {
             .style("stroke", function(d) { return d3.rgb(fill(rdr(d).sname)).darker(); })
             .style("fill", function(d) { return fill(rdr(d).sname); })
             .attr("d", d3.svg.chord().radius(r0))
-            .on("mouseover", function (d) {
+            .on("mouseover", function (d, i) {
                     d3.select("#tooltip")
                     .style("visibility", "visible")
                     .html(chordTip(rdr(d)))
-                    .style("top", function () { return (d3.event.pageY - 10)+"px"})
-                    .style("left", function () { return (d3.event.pageX - 10)+"px";})
-                    })
+                    //.style("top", function () { return (d3.event.pageY - 10)+"px"})
+                    //.style("left", function () { return (d3.event.pageX - 10)+"px";})
+                 chordPaths.classed("fade", function(p) {
+                        return p.source.index != d.source.index && p.target.index != d.source.index;
+                        });
+		})
         .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
 
         function chordTip (d) {
@@ -608,8 +611,8 @@ var allStats = function(error, data) {
             d3.select("#tooltip")
                 .style("visibility", "visible")
                 .html(groupTip(rdr(d)))
-                .style("top", function () { return (d3.event.pageY - 10)+"px"})
-                .style("left", function () { return (d3.event.pageX - 10)+"px";})
+                //.style("top", function () { return (d3.event.pageY - 10)+"px"})
+                //.style("left", function () { return (d3.event.pageX - 10)+"px";})
 
                 chordPaths.classed("fade", function(p) {
                         return p.source.index != i
