@@ -5,11 +5,14 @@ from datetime import datetime
 from elotron_backend import *
 from rankings import *
 from itertools import product
+from flask.ext.login import LoginManager
 import numpy as np
 import base64 as b64
 import sys
 
 app = flask.Flask(__name__)
+lm = LoginManager()
+lm.init_app(app)
 app.secret_key = "CHANGE_ME"
 
 def _match_cmp(x, y, uname):
@@ -56,9 +59,9 @@ def user():
     leaderboard_len = get_config('leaderboard_length', 10)
     matches_per_page = get_config('matches_per_page', 24)
     new_player_period = get_config('new_player_period', 0)
-
+    print "before"
     uname = flask.escape(flask.session['username'])
-
+    print uname
     admin = False
     if uname.endswith("    "):
         uname = uname[:-4]
