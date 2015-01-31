@@ -69,6 +69,11 @@
 
   <body>
     <div class="container">
+      {% if message %}
+      <div id="message" class="alert alert-danger" role="alert">
+	{{message}}
+      </div>
+      {% endif %}
       <form class="form-signin"
             method="post" 
             action="{{ url_for('handle_login') }}">
