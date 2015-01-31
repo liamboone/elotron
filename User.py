@@ -1,26 +1,22 @@
-import models
+class User:
+    def __init__(self, **fields):
+        if 'login' not in fields.keys():
+            raise Exception('User class requires "login" field')
+        self.__dict__.update(fields)
 
-class User(UserMixin):
-	def __init__(self, password = None, active= True, admin = False, name = None):
-		self.name = name
-		self.password = password
-		self.isAdmin = admin
-		self.active = active
-		self.id = None
-	
-	def save(self):
-		newUser = models.User(name=self.name, password=self.password, admin=self.isAdmin)
-		newUser.save()
-		self.id = newUser.id
-		return self.id
+    def __repr__(self):
+        return '<{}>'.format('\n '.join(['{} : {}'.format(k, repr(v))
+                                         for k, v in self.__dict__.items()]))
 
-	def get_by_name(self, name):
-		dbUser = models.User.objects.get(name=name)
-		if dbUser:
-			self.email=dbUser.email
-			self.active=dbUser.active
-			self.password=dbUser.password
-			self.isAdmin=dbUser.isAdmin
-			return self
-		else:
-			return None
+    def is_authenticated(sefl):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.login
+

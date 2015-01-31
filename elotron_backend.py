@@ -7,6 +7,7 @@ from itertools import permutations
 from random import randint
 from datetime import datetime
 from base64 import b64encode, b64decode
+from User import User
 
 class DuplicateError(Exception):
     pass
@@ -225,6 +226,15 @@ def get_all_users():
         logins.append(doc['login'])
 
     return logins
+
+def get_user(uname):
+    """
+    Gets a user object from the database by username (uname)
+    """
+    try:
+        return User(**prts_coll.find_one({'login':uname}))
+    except:
+        return None
 
 def _clear_matches():
     matches_coll.remove({})

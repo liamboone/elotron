@@ -1,11 +1,12 @@
 import json
 import flask
-from flask import request
+from flask import request, session
 from datetime import datetime
 from elotron_backend import *
 from rankings import *
 from itertools import product
-from flask.ext.login import LoginManager
+from flask.ext.login import (LoginManager, login_required,
+                             login_user, logout_user, current_user)
 import numpy as np
 import base64 as b64
 import sys
@@ -36,18 +37,35 @@ def pretty_match(match):
     match['winner'] = np.argmax([score for player,score in match['participants']])
     return match
 
+@lm.user_loader
+def load_user(uname):
+    return get_user(uname)
+
+@app.before_request
+def before_request():
+    flask.g.user = current_user
+
 @app.route('/')
 def index():
     return flask.render_template('index.html')
 
-@app.route('/login/', methods=['POST'])
+@app.route('/login', methods=['POST', 'GET'])
 def handle_login():
-    login = str(request.form['inputLogin'])
+    try:
+        if flask.g.user is not None and flask.g.user.is_authenticated():
+            return flask.redirect('/player')
+    except Exception as e:
+        print str(e)
+        raise e
+
+    uname = str(request.form['inputLogin'])
     password = str(request.form['inputPassword'])
+    remember_me = request.form.get('rememberMe', None) is not None
 
     try:
-        if validate_user(login, password):
-            flask.session['username'] = login
+        if validate_user(uname, password):
+            session['remember_me'] = remember_me
+            login_user(get_user(uname), remember_me)
             return flask.redirect('/player')
     except Exception as e:
         return str(e)
@@ -55,12 +73,13 @@ def handle_login():
     return flask.redirect('/')
 
 @app.route('/player')
+@login_required
 def user():
     leaderboard_len = get_config('leaderboard_length', 10)
     matches_per_page = get_config('matches_per_page', 24)
     new_player_period = get_config('new_player_period', 0)
     print "before"
-    uname = flask.escape(flask.session['username'])
+    uname = current_user.get_id()
     print uname
     admin = False
     if uname.endswith("    "):
@@ -161,8 +180,8 @@ def allstats():
 
     for match in get_matches():
         (p1, s1), (p2, s2) = match['participants']
-	games[p1][p2] += 1
-	games[p2][p1] += 1
+        games[p1][p2] += 1
+        games[p2][p1] += 1
         points[p1][p2] = ((games[p1][p2]-1)*points[p1][p2] + s1) / games[p1][p2]
         points[p2][p1] = ((games[p2][p1]-1)*points[p2][p1] + s2) / games[p2][p1]
 
@@ -222,4 +241,4 @@ def new_match(match_b64):
     return json.dumps(dump)
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
