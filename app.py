@@ -49,6 +49,12 @@ def before_request():
 def index():
     return flask.render_template('index.html')
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return flask.redirect('/')
+
 @app.route('/login', methods=['POST', 'GET'])
 def handle_login():
     try:
@@ -63,7 +69,7 @@ def handle_login():
     remember_me = request.form.get('rememberMe', None) is not None
 
     try:
-        if validate_user(uname, password):
+        if validate_password(uname, password):
             session['remember_me'] = remember_me
             login_user(get_user(uname), remember_me)
             return flask.redirect('/player')

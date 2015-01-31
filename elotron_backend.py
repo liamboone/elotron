@@ -20,7 +20,7 @@ except KeyError:
 participants_collection_name = 'participants'
 matches_collection_name = 'matches'
 config_collection_name = 'config'
-user_collection_name = 'users'
+#user_collection_name = 'users'
 
 try:
     mongo_uri = os.environ['MONGOHQ_URL']
@@ -33,7 +33,7 @@ db = client[db_name]
 prts_coll = db[participants_collection_name]
 matches_coll = db[matches_collection_name]
 config_coll = db[config_collection_name]
-user_coll = db[user_collection_name]
+#user_coll = db[user_collection_name]
 
 def timestamp_now():
     return calendar.timegm(time.gmtime())
@@ -63,42 +63,34 @@ def add_config(name, val):
 
     config_coll.insert(doc)
 
-def add_participant(display_name, login):
-    if prts_coll.find({"login":login}).count() > 0:
+def add_participant(display_name, user_name):
+    if prts_coll.find({"login":user_name}).count() > 0:
         raise Exception
 
+    salt = os.urandom(64)
     doc = {'display_name': display_name,
-           'login': login,
-           'joined_time': timestamp_now()}
+           'login': user_name,
+           'joined_time': timestamp_now(),
+           'pw': hashlib.sha512(salt + password).hexdigest(),
+           'salt': b64encode(salt)}
 
     prts_coll.insert(doc)
 
-def create_user(login, password):
-    if user_coll.find({"login":login}).count() > 0:
-        raise Exception('{} already exists'.format(login))
+def update_password(user_name, password):
+    doc = prts_coll.find_one({"login":user_name})
+    del doc['_id']
 
-    salt = os.urandom(512)
-    doc = {'login': login,
-           'pw': hashlib.sha512(salt + password).hexdigest(),
-           'salt': b64encode(salt)}
+    salt = os.urandom(64)
+    doc['pw'] = hashlib.sha512(salt + password).hexdigest()
+    doc['salt'] = b64encode(salt)
 
-    user_coll.insert(doc)
+    prts_coll.update({"login":user_name}, {"$set":doc}, upsert=False)
 
-def update_user(login, password):
-    doc = user_coll.find_one({"login":login})
-
-    salt = os.urandom(512)
-    doc = {'login': login,
-           'pw': hashlib.sha512(salt + password).hexdigest(),
-           'salt': b64encode(salt)}
-
-    user_coll.update({"login":login}, {"$set":doc}, upsert=False)
-
-def validate_user(login, password):
-    doc = user_coll.find_one({"login":login})
+def validate_password(user_name, password):
+    doc = prts_coll.find_one({"login":user_name})
 
     if doc == None:
-        raise Exception('{} does not exist'.format(login))
+        raise Exception('{} does not exist'.format(user_name))
 
     pw = hashlib.sha512(b64decode(doc['salt']) + password).hexdigest()
 

@@ -16,7 +16,7 @@
     <h3>Leaderboard</h3>
     <div class="list-group">
         {% for rank, user, num_games in leaderboard %}
-        <a href="/{{user}}"
+        <{% if user == uname %}a{% else %}div{% endif %}
             class="list-group-item {% if user == uname %}active{% endif %}">
             <span class="badge">{{ rank|round|int }}</span>
             {{ users[user] }}
@@ -27,13 +27,13 @@
             {# display the footnote #}
                 *
             {% endif %}
-        </a>
+        </{% if user == uname %}a{% else %}div{% endif %}>
         {% endfor %}
     </div>
     {% if uname != "" and ranks[uname] < leaderboard[-1][0] %}
     <div style="text-align:center;"><h4>⋮</h4></div><br />
     <div class="list-group">
-        <a href="/{{uname}}"
+        <a
             class="list-group-item active">
             <span class="badge">{{ ranks[uname]|round|int }}</span>
             {{ users[uname] }}
