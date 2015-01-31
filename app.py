@@ -48,13 +48,21 @@ def before_request():
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html')
+    if current_user.is_authenticated():
+        return flask.redirect('/player')
+    message = request.args.get('message', '')
+    print "message: ", message
+    return flask.render_template('index.html', message=message)
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return flask.redirect('/')
+
+@lm.unauthorized_handler
+def unauthorized_callback():
+    return flask.redirect(flask.url_for('index', message="You must be logged in to do that"))
 
 @app.route('/login', methods=['POST', 'GET'])
 def handle_login():
@@ -85,9 +93,7 @@ def user():
     leaderboard_len = get_config('leaderboard_length', 10)
     matches_per_page = get_config('matches_per_page', 24)
     new_player_period = get_config('new_player_period', 0)
-    print "before"
     uname = current_user.get_id()
-    print uname
     admin = False
     if uname.endswith("    "):
         uname = uname[:-4]
