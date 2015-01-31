@@ -7,6 +7,7 @@ from rankings import *
 from itertools import product
 from flask.ext.login import (LoginManager, login_required,
                              login_user, logout_user, current_user)
+import user_icon
 import numpy as np
 import base64 as b64
 import sys
@@ -150,6 +151,12 @@ def matchstr(match):
     return ["{}: {}".format(get_display_name(p[0]), p[1])
             for p in participants]
 
+
+@app.route('/<uname>/icon')
+def generate_icon(uname):
+    resp = flask.make_response(user_icon.gen_icon(uname))
+    resp.content_type = "image/svg+xml"
+    return resp
 
 @app.route('/<uname>/stats')
 def stats(uname=''):

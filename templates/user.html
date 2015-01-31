@@ -10,6 +10,14 @@
     {% endfor %}
 {% endblock %}
 
+{% block navbar_user_section %}
+    <img src="/{{current_user.get_id()}}/icon" height="18px"></img>
+    {{current_user.get_id()}}
+    <a href="/logout" class="navbar-link left-divider">
+        <span class="glyphicon glyphicon-log-out"></span>
+    </a>
+{% endblock %}
+
 {% block user_content %}
     {% set new_player_found = [] %}
     {{super()}}

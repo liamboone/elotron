@@ -178,18 +178,12 @@
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">ELOTRON</a>
-            <p class="navbar-text navbar-right visible-xs" style="color:#bbb">
-                {{current_user.get_id()}}
-                <a href="/logout" class="navbar-link left-divider">
-                    <span class="glyphicon glyphicon-log-out"></span>
-                </a>
+            <p class="navbar-text navbar-right visible-xs" style="color:#bbb;float:right;padding-right:1em">
+            {% block navbar_user_section %}{% endblock %}
             </p>
         </div>
-        <p class="navbar-text navbar-right hidden-xs" style="color:#bbb">
-            {{current_user.get_id()}}
-            <a href="/logout" class="navbar-link left-divider">
-                <span class="glyphicon glyphicon-log-out"></span>
-            </a>
+        <p class="navbar-text navbar-right hidden-xs" style="color:#bbb;">
+        {{ self.navbar_user_section() }}
         </p>
     </div>
 </div>
