@@ -4,9 +4,9 @@ import sys
 
 def gen_icon(uname):
     H = map(ord, hl.sha256(uname).digest())
-    C = reduce(lambda x, y: x^y, H) / 255.0 / 2.0
-    rgb = "rgb"+str(tuple(int(255*c) for c in cs.hsv_to_rgb(C, 0.7, 0.95)))
-    rgb_inv = "rgb"+str(tuple(int(255*c) for c in cs.hsv_to_rgb(C+0.5, 0.2, 0.45)))
+    C = H[-1] / 255.0
+    rgb = "rgb"+str(tuple(int(255*c) for c in cs.hsv_to_rgb(C, 0.7, 0.75)))
+    rgb_inv = "rgb"+str(tuple(int(255*c) for c in cs.hsv_to_rgb(C, 0.1, 0.95)))
     L = [ch%2 for ch in H]
     #Single axis symmetry
     P = [L[:7],L[7:14],L[14:21],L[21:],L[14:21],L[7:14],L[:7]]

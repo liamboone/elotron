@@ -27,6 +27,7 @@
         <{% if user == uname %}a{% else %}div{% endif %}
             class="list-group-item {% if user == uname %}active{% endif %}">
             <span class="badge">{{ rank|round|int }}</span>
+            <img src="/{{user}}/icon" height="18px"></img>
             {{ users[user] }}
             {% if num_games < new_player_period %}
             {% if new_player_found.append(1) %}{% endif %}
@@ -44,6 +45,7 @@
         <a
             class="list-group-item active">
             <span class="badge">{{ ranks[uname]|round|int }}</span>
+            <img src="/{{user}}/icon" height="18px"></img>
             {{ users[uname] }}
         </a>
     </div>
@@ -77,12 +79,10 @@
                 <div style="color:inherit">
                 {% for i, player in enumerate(match.participants) %}
                 {% if i != 0 %}<br class="">{% endif %}
-                {% if i != 0 %}<small>vs</small>{% endif %}
-                <a id="player-link" href="/{{player[0]}}">
+                <img src="/{{player[0]}}/icon" height="18px"></img>
                     {% if i == match.winner %}<b>{% endif %}
                     {{ users[player[0]] }}
                     {% if i == match.winner %}</b>{% endif %}
-                </a>
                 {% endfor %}
                 </div>
             </h3>
